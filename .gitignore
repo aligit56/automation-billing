@@ -1,0 +1,37 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+Thumbs.db
+
+# Packaging
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+
+# Logs and temp
+*.log
+*.tmp
+*.bak
+
+# Ignore compiled extensions
+*.so
+*.pyd
+
+# Ignore coverage and cache
+.coverage
+.pytest_cache/
