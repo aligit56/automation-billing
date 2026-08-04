@@ -35,3 +35,15 @@ build/
 # Ignore coverage and cache
 .coverage
 .pytest_cache/
+
+# Environment variables
+.env
+
+# Excel / generated data
+*.xlsx
+
+# Database files
+*.db
+
+# macOS
+.DS_Store
