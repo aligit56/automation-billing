@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axian x nGAGE — Automated Attendance Verification & Billing System</title>
+    <meta name="description" content="Live demo of the automated attendance reconciliation pipeline between Axian and nGAGE.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2035;
+            --bg-card-hover: #1f2847;
+            --border: #2a3455;
+            --border-glow: rgba(99, 102, 241, 0.4);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-indigo: #6366f1;
+            --accent-indigo-light: #818cf8;
+            --accent-cyan: #22d3ee;
+            --accent-green: #34d399;
+            --accent-green-bg: rgba(52, 211, 153, 0.12);
+            --accent-amber: #fbbf24;
+            --accent-amber-bg: rgba(251, 191, 36, 0.12);
+            --accent-red: #f87171;
+            --accent-red-bg: rgba(248, 113, 113, 0.12);
+            --accent-blue: #60a5fa;
+            --radius: 12px;
+            --radius-lg: 16px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.15);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.08), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34,211,238,0.05), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Header */
+        .header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(10, 14, 26, 0.85);
+            backdrop-filter: blur(20px) saturate(1.5);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        .header-inner {
+            max-width: 1400px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 64px;
+        }
+        .logo-area { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+            display: grid; place-items: center; font-weight: 800; font-size: 15px; color: #fff;
+        }
+        .logo-text { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
+        .logo-text span { color: var(--accent-cyan); }
+        .header-badge {
+            font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+            padding: 5px 12px; border-radius: 999px;
+            background: rgba(99,102,241,0.15); color: var(--accent-indigo-light);
+            border: 1px solid rgba(99,102,241,0.3);
+        }
+
+        .main { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 2rem; }
+
+        /* Hero */
+        .hero {
+            text-align: center; padding: 3rem 0 2rem;
+        }
+        .hero h1 {
+            font-size: 2.8rem; font-weight: 900; letter-spacing: -1.5px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-indigo-light) 50%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1.15; margin-bottom: 0.75rem;
+        }
+        .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto 2rem; line-height: 1.6; }
+
+        /* Pipeline Steps */
+        .pipeline-controls {
+            display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 2.5rem;
+        }
+        .step-btn {
+            padding: 10px 22px; border-radius: 999px; font-size: 13px; font-weight: 600;
+            cursor: pointer; border: 1px solid var(--border); background: var(--bg-card);
+            color: var(--text-secondary); transition: all 0.3s ease;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .step-btn:hover { border-color: var(--accent-indigo); color: var(--text-primary); background: var(--bg-card-hover); }
+        .step-btn.active {
+            background: linear-gradient(135deg, var(--accent-indigo), #4f46e5);
+            color: #fff; border-color: transparent;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+        }
+        .step-btn.completed {
+            background: var(--accent-green-bg); color: var(--accent-green);
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+        .step-num {
+            width: 22px; height: 22px; border-radius: 50%; font-size: 11px;
+            display: grid; place-items: center;
+            background: rgba(255,255,255,0.1);
+        }
+        .step-btn.active .step-num { background: rgba(255,255,255,0.25); }
+        .step-btn.completed .step-num { background: rgba(52,211,153,0.25); }
+
+        /* Auto-Run Bar */
+        .auto-run-bar {
+            display: flex; justify-content: center; gap: 12px; margin-bottom: 2.5rem;
+        }
+        .run-all-btn {
+            padding: 12px 32px; border-radius: 999px; font-size: 14px; font-weight: 700;
+            cursor: pointer; border: none;
+            background: linear-gradient(135deg, var(--accent-indigo), #7c3aed);
+            color: #fff; transition: all 0.3s ease;
+            box-shadow: 0 4px 24px rgba(99,102,241,0.3);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .run-all-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.45); }
+        .run-all-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .reset-btn {
+            padding: 12px 24px; border-radius: 999px; font-size: 13px; font-weight: 600;
+            cursor: pointer; border: 1px solid var(--border); background: var(--bg-card);
+            color: var(--text-secondary); transition: all 0.3s ease;
+        }
+        .reset-btn:hover { border-color: var(--accent-red); color: var(--accent-red); }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 1.75rem;
+            box-shadow: var(--shadow); margin-bottom: 1.5rem;
+            transition: all 0.4s ease; opacity: 0; transform: translateY(20px);
+        }
+        .card.visible { opacity: 1; transform: translateY(0); }
+        .card-header {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem;
+            padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+        }
+        .card-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+        }
+        .card-icon.ingestion { background: rgba(96, 165, 250, 0.15); color: var(--accent-blue); }
+        .card-icon.validation { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+        .card-icon.exception { background: rgba(248, 113, 113, 0.15); color: var(--accent-red); }
+        .card-icon.snapshot { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+        .card-icon.tamper { background: rgba(248, 113, 113, 0.15); color: var(--accent-red); }
+        .card-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.3px; }
+        .card-subtitle { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Data Table */
+        .data-table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            font-size: 0.85rem;
+        }
+        .data-table thead th {
+            text-align: left; padding: 10px 14px; font-weight: 600; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table tbody tr {
+            transition: background 0.2s;
+        }
+        .data-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+        .data-table tbody td {
+            padding: 10px 14px; border-bottom: 1px solid rgba(42, 52, 85, 0.5);
+            color: var(--text-secondary);
+        }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+        .data-table tbody tr.row-enter { animation: rowSlide 0.4s ease forwards; }
+        @keyframes rowSlide {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge.active { background: var(--accent-green-bg); color: var(--accent-green); }
+        .badge.critical { background: var(--accent-red-bg); color: var(--accent-red); }
+        .badge.warning { background: var(--accent-amber-bg); color: var(--accent-amber); }
+        .badge.resolved { background: var(--accent-green-bg); color: var(--accent-green); }
+        .badge.overridden { background: rgba(96,165,250,0.12); color: var(--accent-blue); }
+        .badge.open { background: var(--accent-red-bg); color: var(--accent-red); }
+
+        /* Metrics Row */
+        .metrics-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.25rem; }
+        .metric-box {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(42,52,85,0.6);
+            border-radius: var(--radius); padding: 14px 16px; text-align: center;
+        }
+        .metric-value {
+            font-size: 1.8rem; font-weight: 800; letter-spacing: -1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .metric-value.green { color: var(--accent-green); }
+        .metric-value.amber { color: var(--accent-amber); }
+        .metric-value.red { color: var(--accent-red); }
+        .metric-value.blue { color: var(--accent-blue); }
+        .metric-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+        /* Hash Display */
+        .hash-block {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            border-radius: 10px; padding: 16px 18px; margin: 12px 0;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+            word-break: break-all; line-height: 1.7;
+        }
+        .hash-label { color: var(--text-muted); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .hash-value { color: var(--accent-cyan); }
+        .hash-value.red { color: var(--accent-red); }
+        .hash-value.green { color: var(--accent-green); }
+
+        /* Exception Cards */
+        .exception-item {
+            background: rgba(248,113,113,0.05); border: 1px solid rgba(248,113,113,0.15);
+            border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+            transition: all 0.5s ease;
+        }
+        .exception-item.resolved {
+            background: rgba(52,211,153,0.05); border-color: rgba(52,211,153,0.15);
+        }
+        .exception-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+        .exception-rule { font-weight: 700; font-size: 0.88rem; }
+        .exception-detail { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+        .exception-meta { display: flex; gap: 16px; margin-top: 8px; font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Resolve Button */
+        .resolve-btn {
+            padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; border: 1px solid rgba(52,211,153,0.3);
+            background: rgba(52,211,153,0.1); color: var(--accent-green);
+            transition: all 0.2s;
+        }
+        .resolve-btn:hover { background: rgba(52,211,153,0.2); }
+        .resolve-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Tamper Section */
+        .tamper-compare {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+            margin-top: 12px;
+        }
+        .tamper-box {
+            border-radius: var(--radius); padding: 14px 16px;
+        }
+        .tamper-box.original { background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.2); }
+        .tamper-box.tampered { background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2); }
+        .tamper-box-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .tamper-box.original .tamper-box-label { color: var(--accent-green); }
+        .tamper-box.tampered .tamper-box-label { color: var(--accent-red); }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            height: 4px; background: rgba(255,255,255,0.06); border-radius: 999px;
+            overflow: hidden; margin: 8px 0;
+        }
+        .progress-bar-fill {
+            height: 100%; border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent-indigo), var(--accent-cyan));
+            transition: width 0.8s ease;
+            width: 0%;
+        }
+
+        /* Terminal Log */
+        .log-area {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px 16px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+            line-height: 1.8; max-height: 220px; overflow-y: auto;
+            color: var(--text-muted);
+        }
+        .log-area .log-info { color: var(--accent-cyan); }
+        .log-area .log-warn { color: var(--accent-amber); }
+        .log-area .log-err { color: var(--accent-red); }
+        .log-area .log-ok { color: var(--accent-green); }
+
+        /* Snapshot Receipt */
+        .snapshot-receipt {
+            background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(99,102,241,0.08));
+            border: 1px solid rgba(52,211,153,0.25);
+            border-radius: var(--radius-lg); padding: 1.75rem; margin-top: 12px;
+            position: relative; overflow: hidden;
+        }
+        .snapshot-receipt::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan), var(--accent-indigo));
+        }
+        .receipt-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); }
+        .receipt-row:last-child { border-bottom: none; }
+        .receipt-key { color: var(--text-muted); font-size: 0.82rem; font-weight: 500; }
+        .receipt-val { color: var(--text-primary); font-size: 0.82rem; font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+        /* Animations */
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .pulsing { animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-text {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan), var(--accent-green));
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+
+        /* Alert Banner */
+        .alert-banner {
+            padding: 14px 20px; border-radius: var(--radius); margin-top: 16px;
+            display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem;
+        }
+        .alert-banner.success { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); color: var(--accent-green); }
+        .alert-banner.danger { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); color: var(--accent-red); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 1.8rem; }
+            .tamper-compare { grid-template-columns: 1fr; }
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+            .pipeline-controls { gap: 6px; }
+            .step-btn { padding: 8px 14px; font-size: 12px; }
+        }
+
+        /* Section visibility */
+        .pipeline-section { display: none; }
+        .pipeline-section.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <div class="logo-icon">Ax</div>
+                <div class="logo-text">Axian <span>× nGAGE</span></div>
+            </div>
+            <div class="header-badge">🔒 SOW Compliance Engine v1.2</div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Automated Attendance<br>Verification & Billing</h1>
+            <p>Live demonstration of the end-to-end data pipeline replacing manual month-end push reports with automated reconciliation, validation, and tamper-proof invoicing.</p>
+        </section>
+
+        <!-- Controls -->
+        <div class="auto-run-bar">
+            <button class="run-all-btn" id="runAllBtn" onclick="runFullPipeline()">
+                ▶ Run Full Pipeline Demo
+            </button>
+            <button class="reset-btn" id="resetBtn" onclick="resetDemo()">
+                ↺ Reset
+            </button>
+        </div>
+
+        <div class="pipeline-controls" id="pipelineControls">
+            <button class="step-btn" data-step="1" onclick="goToStep(1)">
+                <span class="step-num">1</span> Ingestion
+            </button>
+            <button class="step-btn" data-step="2" onclick="goToStep(2)">
+                <span class="step-num">2</span> Validation
+            </button>
+            <button class="step-btn" data-step="3" onclick="goToStep(3)">
+                <span class="step-num">3</span> Exceptions
+            </button>
+            <button class="step-btn" data-step="4" onclick="goToStep(4)">
+                <span class="step-num">4</span> Resolution
+            </button>
+            <button class="step-btn" data-step="5" onclick="goToStep(5)">
+                <span class="step-num">5</span> Snapshot
+            </button>
+            <button class="step-btn" data-step="6" onclick="goToStep(6)">
+                <span class="step-num">6</span> Tamper Test
+            </button>
+        </div>
+
+        <!-- STEP 1: Ingestion -->
+        <section class="pipeline-section" id="section-1">
+            <div class="card visible" id="card-ingestion">
+                <div class="card-header">
+                    <div class="card-icon ingestion">📡</div>
+                    <div>
+                        <div class="card-title">SOW Layer 1 — Data Ingestion from nGAGE API</div>
+                        <div class="card-subtitle">OAuth2 Authenticated • Paginated • Exponential Backoff Retries</div>
+                    </div>
+                </div>
+                <div class="log-area" id="ingestionLog"></div>
+                <div class="progress-bar-container" style="margin-top:12px">
+                    <div class="progress-bar-fill" id="ingestionProgress"></div>
+                </div>
+                <div id="ingestionTable" style="margin-top:16px"></div>
+            </div>
+        </section>
+
+        <!-- STEP 2: Validation -->
+        <section class="pipeline-section" id="section-2">
+            <div class="card visible" id="card-validation">
+                <div class="card-header">
+                    <div class="card-icon validation">⚙️</div>
+                    <div>
+                        <div class="card-title">SOW Layer 2 — Validation Rules Engine</div>
+                        <div class="card-subtitle">Headcount Match • Working Days Check • Absence Threshold</div>
+                    </div>
+                </div>
+                <div class="metrics-row" id="validationMetrics"></div>
+                <div id="validationResults"></div>
+            </div>
+        </section>
+
+        <!-- STEP 3: Exceptions -->
+        <section class="pipeline-section" id="section-3">
+            <div class="card visible" id="card-exceptions">
+                <div class="card-header">
+                    <div class="card-icon exception">🚨</div>
+                    <div>
+                        <div class="card-title">SOW Layer 3 — SLA Exception Queue & Alerts</div>
+                        <div class="card-subtitle">Webhook + Email Notifications Dispatched</div>
+                    </div>
+                </div>
+                <div id="exceptionsQueue"></div>
+                <div class="log-area" id="alertLog" style="margin-top:16px"></div>
+            </div>
+        </section>
+
+        <!-- STEP 4: Resolution -->
+        <section class="pipeline-section" id="section-4">
+            <div class="card visible" id="card-resolution">
+                <div class="card-header">
+                    <div class="card-icon validation">✅</div>
+                    <div>
+                        <div class="card-title">SOW Layer 3 — Axian Operations Resolution</div>
+                        <div class="card-subtitle">Manual Review & Clearance by Ops Manager / HR Admin</div>
+                    </div>
+                </div>
+                <div id="resolutionQueue"></div>
+                <div id="resolutionSummary" style="margin-top:16px"></div>
+            </div>
+        </section>
+
+        <!-- STEP 5: Snapshot -->
+        <section class="pipeline-section" id="section-5">
+            <div class="card visible" id="card-snapshot">
+                <div class="card-header">
+                    <div class="card-icon snapshot">🔏</div>
+                    <div>
+                        <div class="card-title">SOW Layer 4 — Immutable SHA-256 Billing Snapshot</div>
+                        <div class="card-subtitle">Canonical JSON • Cryptographic Hash • HMAC Digital Signature</div>
+                    </div>
+                </div>
+                <div id="snapshotContent"></div>
+            </div>
+        </section>
+
+        <!-- STEP 6: Tamper Detection -->
+        <section class="pipeline-section" id="section-6">
+            <div class="card visible" id="card-tamper">
+                <div class="card-header">
+                    <div class="card-icon tamper">🛡️</div>
+                    <div>
+                        <div class="card-title">Cryptographic Tamper Detection Audit</div>
+                        <div class="card-subtitle">Simulating unauthorized database modification & hash re-verification</div>
+                    </div>
+                </div>
+                <div id="tamperContent"></div>
+            </div>
+        </section>
+    </main>
+
+<script>
+// =============================================================================
+// SIMULATED DATA (mirrors mock nGAGE API from Python backend)
+// =============================================================================
+const PERIOD_KEY = "2026-08";
+const EMPLOYEES = [
+    { code: "EMP-1001", name: "Alice Smith",    status: "ACTIVE", days_worked: 22, approved_leaves: 0, unapproved: 0, location: "US-MAIN" },
+    { code: "EMP-1002", name: "Bob Jones",      status: "ACTIVE", days_worked: 20, approved_leaves: 2, unapproved: 0, location: "US-MAIN" },
+    { code: "EMP-1003", name: "Charlie Brown",  status: "ACTIVE", days_worked: 18, approved_leaves: 1, unapproved: 3, location: "US-MAIN" },
+    { code: "EMP-1004", name: "Diana Prince",   status: "ACTIVE", days_worked: 15, approved_leaves: 0, unapproved: 0, location: "US-MAIN" },
+    { code: "EMP-9999", name: "Ghost Employee", status: "ACTIVE", days_worked: 22, approved_leaves: 0, unapproved: 0, location: "US-MAIN" },
+];
+const EXPECTED_WORKING_DAYS = 22;
+const MASTER_HEADCOUNT = ["EMP-1001", "EMP-1002", "EMP-1003", "EMP-1004"];
+
+let currentStep = 0;
+let isRunning = false;
+let snapshotData = null;
+
+// =============================================================================
+// UTILITIES
+// =============================================================================
+// Speed modifier: multiplied by 4 to make the demo readable during presentations
+function sleep(ms) { return new Promise(r => setTimeout(r, ms * 4)); }
+
+function appendLog(id, text, cls = '') {
+    const el = document.getElementById(id);
+    const line = document.createElement('div');
+    line.className = cls;
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
+}
+
+function sha256Hex(str) {
+    // Simple deterministic hash simulation for demo
+    let h = 0;
+    for (let i = 0; i < str.length; i++) { h = ((h << 5) - h + str.charCodeAt(i)) | 0; }
+    const hex = Math.abs(h).toString(16).padStart(8, '0');
+    return (hex + hex + hex + hex + hex + hex + hex + hex).substring(0, 64);
+}
+
+function updateStepButtons(step, status) {
+    const btn = document.querySelector(`.step-btn[data-step="${step}"]`);
+    if (status === 'active') {
+        btn.classList.add('active');
+        btn.classList.remove('completed');
+    } else if (status === 'completed') {
+        btn.classList.remove('active');
+        btn.classList.add('completed');
+        btn.querySelector('.step-num').textContent = '✓';
+    }
+}
+
+function showSection(n) {
+    document.querySelectorAll('.pipeline-section').forEach(s => s.classList.remove('active'));
+    const sec = document.getElementById(`section-${n}`);
+    if (sec) sec.classList.add('active');
+}
+
+// =============================================================================
+// STEP 1: INGESTION
+// =============================================================================
+async function runIngestion() {
+    showSection(1);
+    updateStepButtons(1, 'active');
+    const log = document.getElementById('ingestionLog');
+    log.innerHTML = '';
+
+    appendLog('ingestionLog', 'Initiating OAuth2 Client Credentials flow...', 'log-info');
+    await sleep(600);
+    appendLog('ingestionLog', 'Bearer token acquired: mock_bearer_xxxx...xxxx (expires in 3600s)', 'log-ok');
+    await sleep(400);
+    appendLog('ingestionLog', `Fetching attendance records for period "${PERIOD_KEY}"...`, 'log-info');
+
+    document.getElementById('ingestionProgress').style.width = '30%';
+    await sleep(500);
+    appendLog('ingestionLog', `Page 1/2 fetched: 4 records (EMP-1001 through EMP-1004)`, 'log-info');
+    document.getElementById('ingestionProgress').style.width = '65%';
+    await sleep(500);
+    appendLog('ingestionLog', `Page 2/2 fetched: 1 record (EMP-9999)`, 'log-info');
+    document.getElementById('ingestionProgress').style.width = '100%';
+    await sleep(300);
+    appendLog('ingestionLog', `✓ Ingestion complete: ${EMPLOYEES.length} total records stored in AttendanceIngestion table.`, 'log-ok');
+
+    // Render table
+    let html = `<table class="data-table">
+        <thead><tr><th>Employee Code</th><th>Name</th><th>Days Worked</th><th>Approved Leave</th><th>Unapproved</th><th>Status</th></tr></thead><tbody>`;
+    for (let i = 0; i < EMPLOYEES.length; i++) {
+        const e = EMPLOYEES[i];
+        const isGhost = !MASTER_HEADCOUNT.includes(e.code);
+        const hasIssue = e.unapproved > 0 || (e.days_worked + e.approved_leaves) !== EXPECTED_WORKING_DAYS || isGhost;
+        html += `<tr class="row-enter" style="animation-delay:${i * 100}ms">
+            <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:${isGhost ? 'var(--accent-red)' : 'var(--accent-cyan)'}">${e.code}</td>
+            <td>${e.name}${isGhost ? ' ⚠️' : ''}</td>
+            <td>${e.days_worked}</td>
+            <td>${e.approved_leaves}</td>
+            <td style="color:${e.unapproved > 0 ? 'var(--accent-red)' : 'var(--accent-green)'}; font-weight:600">${e.unapproved}</td>
+            <td><span class="badge ${hasIssue ? 'warning' : 'active'}">${hasIssue ? '⚠ Flagged' : '✓ Clean'}</span></td>
+        </tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('ingestionTable').innerHTML = html;
+
+    updateStepButtons(1, 'completed');
+}
+
+// =============================================================================
+// STEP 2: VALIDATION
+// =============================================================================
+async function runValidation() {
+    showSection(2);
+    updateStepButtons(2, 'active');
+
+    let passed = 0, flagged = 0;
+    const validationResults = [];
+
+    for (const e of EMPLOYEES) {
+        const isKnown = MASTER_HEADCOUNT.includes(e.code);
+        const totalAccounted = e.days_worked + e.approved_leaves;
+        const daysMismatch = Math.abs(totalAccounted - EXPECTED_WORKING_DAYS) > 0.01;
+        const absenceIssue = e.unapproved > 0;
+
+        if (!isKnown) {
+            validationResults.push({ code: e.code, name: e.name, rule: 'HEADCOUNT_MATCH', severity: 'CRITICAL', detail: 'Employee not in Axian master database' });
+            flagged++;
+        } else if (daysMismatch) {
+            const variance = totalAccounted - EXPECTED_WORKING_DAYS;
+            validationResults.push({ code: e.code, name: e.name, rule: 'WORKING_DAYS_MISMATCH', severity: Math.abs(variance) > 3 ? 'CRITICAL' : 'WARNING',
+                detail: `Accounted ${totalAccounted}d vs expected ${EXPECTED_WORKING_DAYS}d (variance: ${variance > 0 ? '+' : ''}${variance}d)` });
+            flagged++;
+            if (absenceIssue) {
+                validationResults.push({ code: e.code, name: e.name, rule: 'UNAPPROVED_ABSENCE', severity: 'WARNING',
+                    detail: `${e.unapproved} unapproved absence days detected (threshold: 0)` });
+                flagged++;
+            }
+        } else if (absenceIssue) {
+            validationResults.push({ code: e.code, name: e.name, rule: 'UNAPPROVED_ABSENCE', severity: 'WARNING',
+                detail: `${e.unapproved} unapproved absence days detected (threshold: 0)` });
+            flagged++;
+        } else {
+            passed++;
+        }
+    }
+
+    document.getElementById('validationMetrics').innerHTML = `
+        <div class="metric-box"><div class="metric-value blue">${EMPLOYEES.length}</div><div class="metric-label">Total Records</div></div>
+        <div class="metric-box"><div class="metric-value green">${passed}</div><div class="metric-label">Passed Clean</div></div>
+        <div class="metric-box"><div class="metric-value red">${flagged}</div><div class="metric-label">Rules Triggered</div></div>
+        <div class="metric-box"><div class="metric-value amber">3</div><div class="metric-label">Active Rules</div></div>
+    `;
+
+    let html = `<table class="data-table"><thead><tr><th>Employee</th><th>Rule Code</th><th>Severity</th><th>Detail</th></tr></thead><tbody>`;
+    for (const r of validationResults) {
+        html += `<tr class="row-enter"><td style="font-family:'JetBrains Mono',monospace;font-weight:600">${r.code}</td>
+        <td style="color:var(--accent-amber);font-weight:600">${r.rule}</td>
+        <td><span class="badge ${r.severity.toLowerCase()}">${r.severity}</span></td>
+        <td style="font-size:0.8rem">${r.detail}</td></tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('validationResults').innerHTML = html;
+    await sleep(600);
+    updateStepButtons(2, 'completed');
+
+    // Store results for later steps
+    window._validationResults = validationResults;
+}
+
+// =============================================================================
+// STEP 3: EXCEPTION QUEUE & ALERTS
+// =============================================================================
+async function runExceptions() {
+    showSection(3);
+    updateStepButtons(3, 'active');
+    const results = window._validationResults || [];
+    const log = document.getElementById('alertLog');
+    log.innerHTML = '';
+
+    let html = '';
+    for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        const slaHours = r.severity === 'CRITICAL' ? 24 : 48;
+        const slaDue = new Date(Date.now() + slaHours * 3600000);
+        r.slaHours = slaHours;
+        r.slaDue = slaDue;
+        r.id = `EXC-${1001 + i}`;
+
+        html += `<div class="exception-item" id="exc-${r.id}">
+            <div class="exception-header">
+                <span class="exception-rule">${r.rule}</span>
+                <span class="badge ${r.severity.toLowerCase()}">${r.severity}</span>
+            </div>
+            <div class="exception-detail">${r.detail}</div>
+            <div class="exception-meta">
+                <span>👤 ${r.code} (${r.name})</span>
+                <span>⏱ SLA: ${slaHours}h</span>
+                <span>📅 Due: ${slaDue.toLocaleString()}</span>
+                <span class="badge open">OPEN</span>
+            </div>
+        </div>`;
+    }
+    document.getElementById('exceptionsQueue').innerHTML = html;
+
+    await sleep(400);
+    for (const r of results) {
+        appendLog('alertLog', `[WEBHOOK] POST /attendance-alerts → Exception ${r.id} (${r.rule}, ${r.severity})`, 'log-warn');
+        await sleep(250);
+        appendLog('alertLog', `[EMAIL] To: billing-disputes@axian.com → "${r.severity} Attendance Exception: ${r.code}"`, 'log-warn');
+        await sleep(200);
+    }
+    appendLog('alertLog', `✓ ${results.length} webhook + email alerts dispatched successfully.`, 'log-ok');
+
+    updateStepButtons(3, 'completed');
+    window._exceptions = results;
+}
+
+// =============================================================================
+// STEP 4: RESOLUTION
+// =============================================================================
+async function runResolution() {
+    showSection(4);
+    updateStepButtons(4, 'active');
+    const exceptions = window._exceptions || [];
+
+    let html = '';
+    for (const exc of exceptions) {
+        const canResolve = exc.rule !== 'HEADCOUNT_MATCH';
+        html += `<div class="exception-item" id="resolve-${exc.id}">
+            <div class="exception-header">
+                <span class="exception-rule">${exc.rule} — ${exc.code} (${exc.name})</span>
+                ${canResolve ? `<button class="resolve-btn" id="btn-${exc.id}" onclick="resolveException('${exc.id}')">Resolve</button>` : '<span class="badge critical">UNRESOLVABLE</span>'}
+            </div>
+            <div class="exception-detail">${exc.detail}</div>
+            <div class="exception-meta">
+                <span class="badge open" id="status-${exc.id}">OPEN</span>
+            </div>
+        </div>`;
+    }
+    document.getElementById('resolutionQueue').innerHTML = html;
+
+    // Auto-resolve in demo mode
+    for (const exc of exceptions) {
+        if (exc.rule === 'HEADCOUNT_MATCH') continue;
+        await sleep(1000);
+        resolveException(exc.id);
+    }
+
+    await sleep(600);
+
+    const openCount = exceptions.filter(e => e.rule === 'HEADCOUNT_MATCH').length;
+    const resolved = exceptions.length - openCount;
+    document.getElementById('resolutionSummary').innerHTML = `
+        <div class="metrics-row">
+            <div class="metric-box"><div class="metric-value green">${resolved}</div><div class="metric-label">Resolved</div></div>
+            <div class="metric-box"><div class="metric-value red">${openCount}</div><div class="metric-label">Open (Excluded)</div></div>
+        </div>
+        <div class="alert-banner success">✓ Resolvable exceptions cleared. ${openCount > 0 ? `${openCount} unknown headcount record excluded from billing.` : 'All clear for snapshot generation.'}</div>
+    `;
+
+    updateStepButtons(4, 'completed');
+}
+
+function resolveException(id) {
+    const item = document.getElementById(`resolve-${id}`);
+    const badge = document.getElementById(`status-${id}`);
+    const btn = document.getElementById(`btn-${id}`);
+    if (item) item.classList.add('resolved');
+    if (badge) { badge.className = 'badge resolved'; badge.textContent = 'RESOLVED'; }
+    if (btn) { btn.textContent = '✓ Done'; btn.disabled = true; }
+}
+
+// =============================================================================
+// STEP 5: SNAPSHOT
+// =============================================================================
+async function runSnapshot() {
+    showSection(5);
+    updateStepButtons(5, 'active');
+
+    // Build canonical payload
+    const approvedEmps = EMPLOYEES.filter(e => MASTER_HEADCOUNT.includes(e.code));
+    const totalBillable = approvedEmps.reduce((s, e) => s + e.days_worked, 0);
+    const totalLeaves = approvedEmps.reduce((s, e) => s + e.approved_leaves, 0);
+
+    const payload = {
+        version: "v1.2.0",
+        period_key: PERIOD_KEY,
+        ingestion_batch_id: "batch-" + Date.now().toString(36),
+        summary: { total_headcount: approvedEmps.length, total_billable_days: totalBillable, total_approved_leaves: totalLeaves },
+        line_items: approvedEmps.map(e => ({
+            employee_code: e.code,
+            days_worked: e.days_worked,
+            approved_leaves: e.approved_leaves,
+            unapproved_absences: e.unapproved,
+        }))
+    };
+
+    const canonicalJson = JSON.stringify(payload, Object.keys(payload).sort());
+    const hash = sha256Hex(canonicalJson);
+    const hmac = sha256Hex("HMAC:" + canonicalJson);
+    const snapshotId = `SNP-${PERIOD_KEY}-${hash.substring(0, 8).toUpperCase()}`;
+
+    snapshotData = { payload, canonicalJson, hash, hmac, snapshotId, totalBillable, totalLeaves, headcount: approvedEmps.length };
+
+    document.getElementById('snapshotContent').innerHTML = `
+        <div class="snapshot-receipt">
+            <div style="text-align:center;margin-bottom:16px">
+                <div style="font-size:1.4rem;font-weight:800;letter-spacing:-0.5px" class="shimmer-text">IMMUTABLE BILLING SNAPSHOT</div>
+                <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Generated ${new Date().toLocaleString()}</div>
+            </div>
+            <div class="receipt-row"><span class="receipt-key">Snapshot ID</span><span class="receipt-val" style="color:var(--accent-cyan)">${snapshotId}</span></div>
+            <div class="receipt-row"><span class="receipt-key">Period</span><span class="receipt-val">${PERIOD_KEY}</span></div>
+            <div class="receipt-row"><span class="receipt-key">Total Headcount</span><span class="receipt-val">${approvedEmps.length} employees</span></div>
+            <div class="receipt-row"><span class="receipt-key">Total Billable Days</span><span class="receipt-val" style="color:var(--accent-green)">${totalBillable.toFixed(1)}</span></div>
+            <div class="receipt-row"><span class="receipt-key">Total Approved Leaves</span><span class="receipt-val">${totalLeaves.toFixed(1)}</span></div>
+        </div>
+
+        <div class="hash-block" style="margin-top:16px">
+            <div class="hash-label">SHA-256 Content Hash (snapshot_hash)</div>
+            <div class="hash-value green">${hash}</div>
+        </div>
+        <div class="hash-block">
+            <div class="hash-label">HMAC-SHA256 Digital Signature (hmac_signature)</div>
+            <div class="hash-value green">${hmac}</div>
+        </div>
+
+        <div class="alert-banner success" style="margin-top:16px">🔏 Snapshot locked and ready for ERP / Invoicing System trigger. Data is now immutable.</div>
+    `;
+
+    updateStepButtons(5, 'completed');
+}
+
+// =============================================================================
+// STEP 6: TAMPER DETECTION
+// =============================================================================
+async function runTamperTest() {
+    showSection(6);
+    updateStepButtons(6, 'active');
+
+    if (!snapshotData) {
+        document.getElementById('tamperContent').innerHTML = '<div class="alert-banner danger">⚠ Run steps 1-5 first to generate a snapshot.</div>';
+        return;
+    }
+
+    const originalHash = snapshotData.hash;
+
+    // Tamper: change billable days from real value to 999
+    const tampered = JSON.parse(JSON.stringify(snapshotData.payload));
+    tampered.summary.total_billable_days = 999.0;
+    const tamperedJson = JSON.stringify(tampered, Object.keys(tampered).sort());
+    const tamperedHash = sha256Hex(tamperedJson);
+
+    document.getElementById('tamperContent').innerHTML = `
+        <div style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:16px;line-height:1.6">
+            Simulating a rogue actor directly modifying the database record — changing <strong style="color:var(--accent-green)">total_billable_days: ${snapshotData.totalBillable}</strong>
+            to <strong style="color:var(--accent-red)">total_billable_days: 999.0</strong> — and then re-running the integrity audit...
+        </div>
+
+        <div class="tamper-compare">
+            <div class="tamper-box original">
+                <div class="tamper-box-label">✓ Original Stored Record</div>
+                <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.7">
+                    <strong>Billable Days:</strong> ${snapshotData.totalBillable}<br>
+                    <strong>Headcount:</strong> ${snapshotData.headcount}<br>
+                    <strong>Leaves:</strong> ${snapshotData.totalLeaves}
+                </div>
+            </div>
+            <div class="tamper-box tampered">
+                <div class="tamper-box-label">✗ Tampered Database Record</div>
+                <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.7">
+                    <strong>Billable Days:</strong> <span style="color:var(--accent-red);font-weight:700;text-decoration:line-through">${snapshotData.totalBillable}</span> → <span style="color:var(--accent-red);font-weight:700">999.0</span><br>
+                    <strong>Headcount:</strong> ${snapshotData.headcount}<br>
+                    <strong>Leaves:</strong> ${snapshotData.totalLeaves}
+                </div>
+            </div>
+        </div>
+
+        <div class="hash-block" style="margin-top:16px">
+            <div class="hash-label">Original SHA-256 Hash (stored at creation time)</div>
+            <div class="hash-value green">${originalHash}</div>
+        </div>
+        <div class="hash-block">
+            <div class="hash-label">Re-Computed SHA-256 Hash (from tampered payload)</div>
+            <div class="hash-value red">${tamperedHash}</div>
+        </div>
+        <div class="hash-block" style="border-color:rgba(248,113,113,0.4)">
+            <div class="hash-label" style="color:var(--accent-red)">Match Result</div>
+            <div class="hash-value red" style="font-size:0.9rem;font-weight:700">
+                ✗ MISMATCH DETECTED — Hashes do not match!
+            </div>
+        </div>
+
+        <div class="alert-banner danger" style="margin-top:16px">
+            🚨 TAMPER DETECTED: Payload SHA-256 hash mismatch! The billing record has been modified after snapshot creation. Invoice generation BLOCKED.
+        </div>
+    `;
+
+    updateStepButtons(6, 'completed');
+}
+
+// =============================================================================
+// PIPELINE CONTROL
+// =============================================================================
+async function runFullPipeline() {
+    if (isRunning) return;
+    isRunning = true;
+    document.getElementById('runAllBtn').disabled = true;
+    document.getElementById('runAllBtn').innerHTML = '⏳ Pipeline Running...';
+
+    await runIngestion();
+    await sleep(800);
+    await runValidation();
+    await sleep(800);
+    await runExceptions();
+    await sleep(800);
+    await runResolution();
+    await sleep(800);
+    await runSnapshot();
+    await sleep(800);
+    await runTamperTest();
+
+    isRunning = false;
+    document.getElementById('runAllBtn').disabled = false;
+    document.getElementById('runAllBtn').innerHTML = '✓ Pipeline Complete';
+    document.getElementById('runAllBtn').style.background = 'linear-gradient(135deg, #059669, #10b981)';
+}
+
+function goToStep(n) {
+    currentStep = n;
+    showSection(n);
+    const steps = { 1: runIngestion, 2: runValidation, 3: runExceptions, 4: runResolution, 5: runSnapshot, 6: runTamperTest };
+    if (steps[n]) steps[n]();
+}
+
+function resetDemo() {
+    isRunning = false;
+    currentStep = 0;
+    snapshotData = null;
+    window._validationResults = null;
+    window._exceptions = null;
+    document.querySelectorAll('.pipeline-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.step-btn').forEach(b => {
+        b.classList.remove('active', 'completed');
+        const num = b.getAttribute('data-step');
+        b.querySelector('.step-num').textContent = num;
+    });
+    document.getElementById('runAllBtn').disabled = false;
+    document.getElementById('runAllBtn').innerHTML = '▶ Run Full Pipeline Demo';
+    document.getElementById('runAllBtn').style.background = '';
+    // Clear content
+    ['ingestionLog', 'ingestionTable', 'validationMetrics', 'validationResults',
+     'exceptionsQueue', 'alertLog', 'resolutionQueue', 'resolutionSummary',
+     'snapshotContent', 'tamperContent'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
+    document.getElementById('ingestionProgress').style.width = '0%';
+}
+</script>
+</body>
+</html>
