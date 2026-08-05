@@ -1,14 +1,15 @@
-# Attendance Automation (Axian x nGAGE)
+# Automation Billing
 
-A small demo project for Attendance Verification & Billing automation integrating with nGAGE APIs.
+A demo repository for attendance verification and billing automation integrating with nGAGE APIs.
 
 ## Overview
 
 This repository contains a prototype pipeline that:
 
-- Seeds master HR data
+- Seeds master HR and attendance data
 - Runs validation and exception workflows
 - Produces immutable billing snapshots
+- Supports a demo dashboard and billed snapshot generation
 
 ## Quickstart
 
@@ -31,9 +32,19 @@ pip install -r requirements.txt
 python demo_pipeline.py
 ```
 
+## Files
+
+- `app.py` – entry point for the application
+- `demo_pipeline.py` – demo workflow execution script
+- `exception_workflow.py` – exception handling and validation logic
+- `snapshot_engine.py` – billing snapshot generation
+- `validation_engine.py` – attendance validation logic
+- `ngage_client.py` – nGAGE API integration
+- `static/` – demo dashboard front-end assets
+
 ## Tests
 
-Run unit tests (if present):
+Run unit tests using:
 
 ```powershell
 python -m unittest discover -v
@@ -41,8 +52,8 @@ python -m unittest discover -v
 
 ## Notes
 
-- This repository was pushed to GitHub at `aligit56/attendance-automation`.
-- If you run into missing dependency issues on MSYS environments, prefer using a system Python with working `pip` or use WSL/Windows-native Python.
+- Repository is published to GitHub at `https://github.com/aligit56/automation-billing`
+- Keep generated files, logs, and local environments out of source control using `.gitignore`
 
 ## License
 

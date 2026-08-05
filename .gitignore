@@ -5,6 +5,7 @@ __pycache__/
 
 # Virtual environments
 .venv/
+.venv_uv/
 venv/
 env/
 
@@ -28,6 +29,9 @@ build/
 *.tmp
 *.bak
 
+# Executables and tools
+*.exe
+
 # Ignore compiled extensions
 *.so
 *.pyd
@@ -39,11 +43,13 @@ build/
 # Environment variables
 .env
 
-# Excel / generated data
+# Generated data and local artifacts
 *.xlsx
-
-# Database files
 *.db
+
+# Windows
+ehthumbs.db
+Desktop.ini
 
 # macOS
 .DS_Store
