@@ -103,6 +103,37 @@ def parse_excel(filepath="dummy_attendance_records.xlsx"):
     records = df.to_dict(orient="records")
     return records
 
+def update_excel_record(filepath, employee_code, days_worked, leaves, absences):
+    """
+    Updates an employee's attendance record in the Excel file without losing formatting.
+    """
+    wb = load_workbook(filepath)
+    if "Attendance_Summary" not in wb.sheetnames:
+        return False
+        
+    ws = wb["Attendance_Summary"]
+    
+    # Find headers to get column indices
+    headers = {cell.value: cell.column for cell in ws[1]}
+    
+    code_col = headers.get("employee_code")
+    days_col = headers.get("days_worked")
+    leaves_col = headers.get("approved_leaves")
+    abs_col = headers.get("unapproved_absences")
+    
+    if not all([code_col, days_col, leaves_col, abs_col]):
+        return False
+        
+    for row in range(2, ws.max_row + 1):
+        if ws.cell(row=row, column=code_col).value == employee_code:
+            ws.cell(row=row, column=days_col).value = float(days_worked)
+            ws.cell(row=row, column=leaves_col).value = float(leaves)
+            ws.cell(row=row, column=abs_col).value = float(absences)
+            wb.save(filepath)
+            return True
+            
+    return False
+
 if __name__ == "__main__":
     import os
     

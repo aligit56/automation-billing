@@ -225,3 +225,23 @@ class BillingSnapshot(Base):
             "hmac_signature": self.hmac_signature,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+
+class SystemSettings(Base):
+    """Admin configuration for email and automated triggers."""
+    __tablename__ = "system_settings"
+
+    id = Column(Integer, primary_key=True)
+    sender_email = Column(String(255), nullable=False, default="admin@axian.com")
+    trigger_time = Column(String(10), nullable=False, default="17:00")
+    smtp_password = Column(String(255), nullable=True)
+    smtp_host = Column(String(255), nullable=False, default="smtp.gmail.com")
+    smtp_port = Column(Integer, nullable=False, default=587)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "sender_email": self.sender_email,
+            "trigger_time": self.trigger_time,
+            "smtp_password": "********" if self.smtp_password else "",
+            "smtp_host": self.smtp_host,
+            "smtp_port": self.smtp_port
+        }

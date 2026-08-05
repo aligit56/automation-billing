@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <div class="logo-icon">Ax</div>
+                <div class="logo-text">Axian <span>Admin</span></div>
+            </div>
+            <div class="header-badge">🔒 Secure Connection</div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Attendance Dashboard</h1>
+            <p>Manage attendance, communicate with employees, and configure system automated triggers.</p>
+        </section>
+
+        <!-- Controls -->
+        <div class="auto-run-bar">
+            <button class="run-all-btn" id="runPipelineBtn" onclick="runPipeline()">
+                ▶ Run Month-End Pipeline
+            </button>
+            <button class="reset-btn" id="refreshBtn" onclick="fetchAllData()">
+                ↺ Refresh Data
+            </button>
+        </div>
+
+        <div id="loader" class="loader" style="display:none;">Loading... Please wait...</div>
+
+        <!-- Metrics Row -->
+        <div class="metrics-row" id="metricsRow">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Employees Section -->
+        <div class="card visible">
+            <div class="card-header">
+                <div class="card-icon validation">👥</div>
+                <div style="flex: 1;">
+                    <div class="card-title">Employee Attendance View</div>
+                    <div class="card-subtitle">Current working metrics from dummy sheet</div>
+                </div>
+                <div>
+                    <button class="run-all-btn" onclick="sendEmails()">✉️ Send Email to Selected</button>
+                </div>
+            </div>
+            <div id="employeesQueue">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll" onclick="toggleAll()"></th>
+                            <th>Employee Code</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Days Worked</th>
+                            <th>Leaves</th>
+                            <th>Absences</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeesTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="card visible">
+            <div class="card-header">
+                <div class="card-icon exception">⚙️</div>
+                <div>
+                    <div class="card-title">System Settings</div>
+                    <div class="card-subtitle">Configure root email and pipeline trigger time</div>
+                </div>
+            </div>
+            <div style="padding: 24px;">
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">Root Sender Email</label>
+                    <input type="email" id="senderEmail" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">Trigger Time (HH:MM)</label>
+                    <input type="time" id="triggerTime" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">SMTP Password / App Password</label>
+                    <input type="password" id="smtpPassword" placeholder="********" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
+                </div>
+                <div style="margin-bottom: 16px; display: flex; gap: 16px;">
+                    <div style="flex: 2;">
+                        <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">SMTP Host</label>
+                        <input type="text" id="smtpHost" placeholder="smtp.gmail.com" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">SMTP Port</label>
+                        <input type="number" id="smtpPort" placeholder="587" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
+                    </div>
+                </div>
+                <button class="resolve-btn" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        async function fetchAllData() {
+            try {
+                // Fetch Settings
+                const setRes = await fetch('/api/settings');
+                const settings = await setRes.json();
+                document.getElementById('senderEmail').value = settings.sender_email;
+                document.getElementById('triggerTime').value = settings.trigger_time;
+                document.getElementById('smtpPassword').value = settings.smtp_password;
+                document.getElementById('smtpHost').value = settings.smtp_host;
+                document.getElementById('smtpPort').value = settings.smtp_port;
+
+                // Fetch Metrics
+                const dashRes = await fetch('/api/dashboard_data');
+                const data = await dashRes.json();
+                document.getElementById('metricsRow').innerHTML = `
+                    <div class="metric-box"><div class="metric-value blue">${data.total_employees}</div><div class="metric-label">Total Employees</div></div>
+                    <div class="metric-box"><div class="metric-value red">${data.exceptions.filter(e => e.status === 'OPEN').length}</div><div class="metric-label">Open Exceptions</div></div>
+                    <div class="metric-box"><div class="metric-value amber">${data.rules.filter(r => r.is_active).length}</div><div class="metric-label">Active Rules</div></div>
+                    <div class="metric-box"><div class="metric-value green">${data.snapshots.length}</div><div class="metric-label">Snapshots</div></div>
+                `;
+
+                // Fetch Employees
+                const empRes = await fetch('/api/employees');
+                const employees = await empRes.json();
+                
+                const empBody = document.getElementById('employeesTableBody');
+                empBody.innerHTML = '';
+                employees.forEach(emp => {
+                    empBody.innerHTML += `
+                        <tr class="row-enter">
+                            <td><input type="checkbox" class="emp-checkbox" value="${emp.employee_code}"></td>
+                            <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--accent-cyan)">${emp.employee_code}</td>
+                            <td>${emp.full_name}</td>
+                            <td>${emp.email}</td>
+                            <td>${emp.days_worked}</td>
+                            <td>${emp.approved_leaves}</td>
+                            <td style="color:${emp.unapproved_absences > 0 ? 'var(--accent-red)' : 'white'}">${emp.unapproved_absences}</td>
+                        </tr>
+                    `;
+                });
+
+            } catch (error) {
+                console.error("Failed to fetch data", error);
+            }
+        }
+
+        async function saveSettings() {
+            const sender = document.getElementById('senderEmail').value;
+            const time = document.getElementById('triggerTime').value;
+            const pwd = document.getElementById('smtpPassword').value;
+            const host = document.getElementById('smtpHost').value;
+            const port = parseInt(document.getElementById('smtpPort').value);
+            
+            try {
+                const res = await fetch('/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        sender_email: sender, 
+                        trigger_time: time,
+                        smtp_password: pwd,
+                        smtp_host: host,
+                        smtp_port: port
+                    })
+                });
+                if(res.ok) {
+                    alert('Settings saved successfully!');
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function toggleAll() {
+            const selectAll = document.getElementById('selectAll').checked;
+            const checkboxes = document.querySelectorAll('.emp-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll);
+        }
+
+        async function sendEmails() {
+            const checkboxes = document.querySelectorAll('.emp-checkbox:checked');
+            const codes = Array.from(checkboxes).map(cb => cb.value);
+            
+            if(codes.length === 0) {
+                alert("Please select at least one employee.");
+                return;
+            }
+            
+            try {
+                const res = await fetch('/api/send_email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ employee_codes: codes })
+                });
+                const data = await res.json();
+                alert(data.message);
+                
+                checkboxes.forEach(cb => cb.checked = false);
+                document.getElementById('selectAll').checked = false;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function runPipeline() {
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('runPipelineBtn').disabled = true;
+            try {
+                const response = await fetch('/api/run_pipeline', { method: 'POST' });
+                const data = await response.json();
+                if (data.status === 'success') {
+                    await fetchAllData();
+                } else {
+                    alert('Pipeline run failed.');
+                }
+            } catch(e) {
+                console.error(e);
+                alert('Pipeline run error.');
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('runPipelineBtn').disabled = false;
+            }
+        }
+
+        // Initial Load
+        document.addEventListener('DOMContentLoaded', fetchAllData);
+    </script>
+</body>
+</html>

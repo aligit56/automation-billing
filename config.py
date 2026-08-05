@@ -57,7 +57,7 @@ class SnapshotConfig:
 @dataclass
 class AppConfig:
     """Main Application Configuration Aggregator."""
-    db_uri: str = os.getenv("DATABASE_URL", "sqlite:///:memory:")  # Supports PostgreSQL postgresql://...
+    db_uri: str = os.getenv("DATABASE_URL", "sqlite:///attendance.db")  # Supports PostgreSQL postgresql://...
     environment: str = os.getenv("APP_ENV", "production")
     ngage_api: NGAGEApiConfig = field(default_factory=NGAGEApiConfig)
     validation: ValidationConfig = field(default_factory=ValidationConfig)
