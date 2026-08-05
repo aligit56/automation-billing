@@ -17,7 +17,7 @@ class NGAGEApiConfig:
     """SOW Layer 1: Configuration for nGAGE API Integration."""
     base_url: str = os.getenv("NGAGE_BASE_URL", "https://api.ngage-workforce.com/v2")
     client_id: str = os.getenv("NGAGE_CLIENT_ID", "axian_client_prod_883")
-    client_secret: str = os.getenv("NGAGE_CLIENT_SECRET", "secret_key_axian_99218")
+    client_secret: str = os.getenv("NGAGE_CLIENT_SECRET", "")
     token_url: str = os.getenv("NGAGE_TOKEN_URL", "https://api.ngage-workforce.com/oauth/token")
     timeout_seconds: int = 30
     max_retries: int = 4
@@ -50,7 +50,7 @@ class SLAConfig:
 class SnapshotConfig:
     """SOW Layer 4: Immutable Billing Snapshot Integrity Settings."""
     hash_algorithm: str = "sha256"
-    hmac_secret: str = os.getenv("HMAC_SECRET", "Axian-nGAGE-Billing-Secret-2026")
+    hmac_secret: str = os.getenv("HMAC_SECRET", "")
     system_version: str = "v1.2.0"
 
 

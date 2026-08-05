@@ -50,10 +50,30 @@ Run unit tests using:
 python -m unittest discover -v
 ```
 
+## Environment Variables
+
+Create a `.env` file or configure environment variables before running the project.
+
+Example variables:
+
+```text
+NGAGE_BASE_URL=https://api.ngage-workforce.com/v2
+NGAGE_CLIENT_ID=your_ngage_client_id
+NGAGE_CLIENT_SECRET=your_ngage_client_secret
+NGAGE_TOKEN_URL=https://api.ngage-workforce.com/oauth/token
+DATABASE_URL=sqlite:///attendance.db
+HMAC_SECRET=your_hmac_secret
+APP_ENV=development
+ALERT_WEBHOOK_URL=https://hooks.axian-ops.internal/attendance-alerts
+SMTP_SERVER=smtp.axian-ops.internal
+ALERT_EMAIL=billing-disputes@axian.com
+```
+
 ## Notes
 
 - Repository is published to GitHub at `https://github.com/aligit56/automation-billing`
 - Keep generated files, logs, and local environments out of source control using `.gitignore`
+- Do not commit secrets or sensitive credentials to the repository
 
 ## License
 
