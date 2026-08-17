@@ -1,246 +1,607 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Admin Panel</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/styles.css">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Axian Attendance Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --brand:#1a237e;--brand-light:#3949ab;--brand-pale:#e8eaf6;
+  --success:#2e7d32;--success-bg:#e8f5e9;--success-border:#a5d6a7;
+  --warning:#f57c00;--warning-bg:#fff3e0;--warning-border:#ffcc80;
+  --danger:#c62828;--danger-bg:#ffebee;--danger-border:#ef9a9a;
+  --info:#0277bd;--info-bg:#e1f5fe;--info-border:#81d4fa;
+  --purple:#6a1b9a;--purple-bg:#f3e5f5;--purple-border:#ce93d8;
+  --neutral:#546e7a;--neutral-bg:#eceff1;--neutral-border:#b0bec5;
+  --surface:#ffffff;--bg:#f0f4f8;--border:#e2e8f0;
+  --text:#1e293b;--text-muted:#64748b;--text-faint:#94a3b8;
+  --radius:10px;--radius-sm:6px;--shadow:0 2px 12px rgba(0,0,0,.07);--shadow-md:0 4px 20px rgba(0,0,0,.1);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.mso{font-family:'Material Symbols Outlined';font-size:18px;line-height:1;vertical-align:middle;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+
+/* ── Topbar ── */
+.topbar{background:var(--brand);color:#fff;height:56px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.topbar-logo{font-size:15px;font-weight:700;letter-spacing:.5px}
+.topbar-sub{font-size:12px;opacity:.7;margin-top:1px}
+.topbar-spacer{flex:1}
+.topbar-refresh{background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:var(--radius-sm);padding:6px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
+.topbar-refresh:hover{background:rgba(255,255,255,.2)}
+
+/* ── Layout ── */
+.main{display:flex;flex:1;min-height:0}
+.sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0}
+.sidebar-section{padding:8px 16px 4px;font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:.8px;text-transform:uppercase}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;border-radius:0;border-left:3px solid transparent}
+.sidebar-item:hover{background:var(--brand-pale);color:var(--brand)}
+.sidebar-item.active{background:var(--brand-pale);color:var(--brand);border-left-color:var(--brand)}
+.content{flex:1;padding:24px;overflow-y:auto;min-width:0}
+
+/* ── Page Title ── */
+.page-header{margin-bottom:20px}
+.page-title{font-size:22px;font-weight:700;color:var(--text)}
+.page-sub{font-size:13px;color:var(--text-muted);margin-top:2px}
+
+/* ── Stat Cards ── */
+.stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:14px 16px;border:1px solid var(--border);cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.stat-card:hover{border-color:var(--brand);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.stat-card.active-filter{border-color:var(--brand);background:var(--brand-pale)}
+.stat-card-accent{position:absolute;top:0;left:0;width:4px;height:100%;border-radius:2px 0 0 2px}
+.stat-card-num{font-size:24px;font-weight:700;margin-bottom:2px}
+.stat-card-label{font-size:11px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px}
+
+/* ── Toolbar ── */
+.toolbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-box{flex:1;min-width:180px;position:relative}
+.search-box input{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--bg);outline:none;transition:border .2s}
+.search-box input:focus{border-color:var(--brand);background:#fff}
+.search-box .mso{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:16px}
+.toolbar-sep{width:1px;height:28px;background:var(--border)}
+.selection-info{font-size:13px;color:var(--text-muted);white-space:nowrap}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-light)}
+.btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#1b5e20}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b71c1c}
+.btn-warning{background:var(--warning);color:#fff}.btn-warning:hover{background:#e65100}
+.btn-outline{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-pale)}
+.btn-ghost{background:transparent;color:var(--text-muted);padding:6px 8px}.btn-ghost:hover{background:var(--bg)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── Table ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.5px;background:#f8fafc;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid #f1f5f9;transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#f8fafc}
+tbody tr.selected{background:var(--brand-pale)}
+td{padding:11px 14px;white-space:nowrap;vertical-align:middle}
+.td-check{width:40px}
+.td-actions{text-align:right}
+
+/* ── Badges ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.badge-success{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
+.badge-danger{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border)}
+.badge-warning{background:var(--warning-bg);color:var(--warning);border:1px solid var(--warning-border)}
+.badge-info{background:var(--info-bg);color:var(--info);border:1px solid var(--info-border)}
+.badge-purple{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+.badge-neutral{background:var(--neutral-bg);color:var(--neutral);border:1px solid var(--neutral-border)}
+
+/* ── Row Actions ── */
+.action-row{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.action-btn{border:none;background:transparent;cursor:pointer;padding:5px;border-radius:var(--radius-sm);display:flex;align-items:center;transition:all .15s}
+.action-btn:hover{background:var(--bg)}
+.action-btn .mso{font-size:16px}
+.action-btn.green:hover{background:var(--success-bg);color:var(--success)}
+.action-btn.red:hover{background:var(--danger-bg);color:var(--danger)}
+.action-btn.orange:hover{background:var(--warning-bg);color:var(--warning)}
+.action-btn.blue:hover{background:var(--info-bg);color:var(--info)}
+
+/* ── Side Panel ── */
+.side-panel{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:16px}
+.panel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.panel-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.panel-row{margin-bottom:12px}
+.panel-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
+.panel-input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;background:#fff;transition:border .2s}
+.panel-input:focus{border-color:var(--brand)}
+.panel-btn-full{width:100%;padding:10px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
+.schedule-info{font-size:12px;color:var(--text-muted);text-align:center;margin-top:8px}
+
+/* ── Empty State ── */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+.empty-state .mso{font-size:48px;margin-bottom:12px;opacity:.3}
+.empty-state p{font-size:14px}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast-item{padding:12px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:#fff;box-shadow:var(--shadow-md);animation:slideIn .3s ease;display:flex;align-items:center;gap:8px;max-width:320px}
+.toast-item.success{background:#2e7d32}
+.toast-item.error{background:#c62828}
+.toast-item.info{background:#0277bd}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
+
+/* ── Spinner ── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Layout switch ── */
+.content-flex{display:flex;gap:20px;align-items:flex-start}
+.content-main{flex:1;min-width:0}
+
+@media(max-width:1200px){.stats-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.sidebar{display:none}.side-panel{width:100%}.content-flex{flex-direction:column}}
+</style>
 </head>
 <body>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-inner">
-            <div class="logo-area">
-                <div class="logo-icon">Ax</div>
-                <div class="logo-text">Axian <span>Admin</span></div>
-            </div>
-            <div class="header-badge">🔒 Secure Connection</div>
-        </div>
-    </header>
+<!-- Topbar -->
+<div class="topbar">
+  <div>
+    <div class="topbar-logo">Axian Attendance</div>
+    <div class="topbar-sub">Admin Portal</div>
+  </div>
+  <div class="topbar-spacer"></div>
+    <button class="topbar-refresh" onclick="openSettings()" style="margin-right:8px">
+    <span class="mso">settings</span> Settings
+  </button><button class="topbar-refresh" onclick="fetchEmployees()">
+    <span class="mso">refresh</span> Refresh Data
+  </button>
+</div>
 
-    <main class="main">
-        <!-- Hero -->
-        <section class="hero">
-            <h1>Attendance Dashboard</h1>
-            <p>Manage attendance, communicate with employees, and configure system automated triggers.</p>
-        </section>
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-section">Navigation</div>
+    <div class="sidebar-item active"><span class="mso">grid_view</span>Dashboard</div>
+    <div class="sidebar-section" style="margin-top:12px">Quick Filters</div>
+    <div class="sidebar-item" onclick="filterByStatus('No Action Taken')"><span class="mso">radio_button_unchecked</span>No Action</div>
+    <div class="sidebar-item" onclick="filterByStatus('Email Sent')"><span class="mso">mail</span>Email Sent</div>
+    <div class="sidebar-item" onclick="filterByStatus('Response Received')"><span class="mso">mark_email_read</span>Responses</div>
+    <div class="sidebar-item" onclick="filterByStatus('Approved')"><span class="mso">check_circle</span>Approved</div>
+    <div class="sidebar-item" onclick="filterByStatus('Rejected')"><span class="mso">cancel</span>Rejected</div>
+    <div class="sidebar-item" onclick="filterByStatus('Expired')"><span class="mso">timer_off</span>Expired</div>
+    <div class="sidebar-item" onclick="filterByStatus('')"><span class="mso">people</span>All Employees</div>
+  </div>
 
-        <!-- Controls -->
-        <div class="auto-run-bar">
-            <button class="run-all-btn" id="runPipelineBtn" onclick="runPipeline()">
-                ▶ Run Month-End Pipeline
-            </button>
-            <button class="reset-btn" id="refreshBtn" onclick="fetchAllData()">
-                ↺ Refresh Data
-            </button>
-        </div>
+  <!-- Main content -->
+  <div class="content">
+    <div class="page-header">
+      <div class="page-title">Overview</div>
+      <div class="page-sub">Monitor and manage employee attendance verification</div>
+    </div>
 
-        <div id="loader" class="loader" style="display:none;">Loading... Please wait...</div>
+    <!-- Stat cards -->
+    <div class="stats-row">
+      <div class="stat-card" onclick="filterByStatus('')" id="sc-all">
+        <div class="stat-card-accent" style="background:#64748b"></div>
+        <div class="stat-card-num" id="cnt-all" style="color:#64748b">—</div>
+        <div class="stat-card-label">Total</div>
+      </div>
+      <div class="stat-card" onclick="filterByStatus('No Action Taken')" id="sc-noa">
+        <div class="stat-card-accent" style="background:var(--neutral)"></div>
+        <div class="stat-card-num" id="cnt-noa" style="color:var(--neutral)">—</div>
+        <div class="stat-card-label">No Action</div>
+      </div>
+      <div class="stat-card" onclick="filterByStatus('Email Sent')" id="sc-sent">
+        <div class="stat-card-accent" style="background:var(--info)"></div>
+        <div class="stat-card-num" id="cnt-sent" style="color:var(--info)">—</div>
+        <div class="stat-card-label">Email Sent</div>
+      </div>
+      <div class="stat-card" onclick="filterByStatus('Response Received')" id="sc-resp">
+        <div class="stat-card-accent" style="background:var(--purple)"></div>
+        <div class="stat-card-num" id="cnt-resp" style="color:var(--purple)">—</div>
+        <div class="stat-card-label">Responses</div>
+      </div>
+      <div class="stat-card" onclick="filterByStatus('Approved')" id="sc-appr">
+        <div class="stat-card-accent" style="background:var(--success)"></div>
+        <div class="stat-card-num" id="cnt-appr" style="color:var(--success)">—</div>
+        <div class="stat-card-label">Approved</div>
+      </div>
+      <div class="stat-card" onclick="filterByStatus('Rejected')" id="sc-rej">
+        <div class="stat-card-accent" style="background:var(--danger)"></div>
+        <div class="stat-card-num" id="cnt-rej" style="color:var(--danger)">—</div>
+        <div class="stat-card-label">Rejected</div>
+      </div>
+    </div>
 
-        <!-- Metrics Row -->
-        <div class="metrics-row" id="metricsRow">
-            <!-- Populated by JS -->
-        </div>
-
-        <!-- Employees Section -->
-        <div class="card visible">
-            <div class="card-header">
-                <div class="card-icon validation">👥</div>
-                <div style="flex: 1;">
-                    <div class="card-title">Employee Attendance View</div>
-                    <div class="card-subtitle">Current working metrics from dummy sheet</div>
-                </div>
-                <div>
-                    <button class="run-all-btn" onclick="sendEmails()">✉️ Send Email to Selected</button>
-                </div>
-            </div>
-            <div id="employeesQueue">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="selectAll" onclick="toggleAll()"></th>
-                            <th>Employee Code</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Days Worked</th>
-                            <th>Leaves</th>
-                            <th>Absences</th>
-                        </tr>
-                    </thead>
-                    <tbody id="employeesTableBody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Settings Section -->
-        <div class="card visible">
-            <div class="card-header">
-                <div class="card-icon exception">⚙️</div>
-                <div>
-                    <div class="card-title">System Settings</div>
-                    <div class="card-subtitle">Configure root email and pipeline trigger time</div>
-                </div>
-            </div>
-            <div style="padding: 24px;">
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">Root Sender Email</label>
-                    <input type="email" id="senderEmail" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
-                </div>
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">Trigger Time (HH:MM)</label>
-                    <input type="time" id="triggerTime" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
-                </div>
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">SMTP Password / App Password</label>
-                    <input type="password" id="smtpPassword" placeholder="********" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
-                </div>
-                <div style="margin-bottom: 16px; display: flex; gap: 16px;">
-                    <div style="flex: 2;">
-                        <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">SMTP Host</label>
-                        <input type="text" id="smtpHost" placeholder="smtp.gmail.com" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="display: block; color: var(--text-secondary); margin-bottom: 8px;">SMTP Port</label>
-                        <input type="number" id="smtpPort" placeholder="587" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: white;" />
-                    </div>
-                </div>
-                <button class="resolve-btn" onclick="saveSettings()">Save Settings</button>
-            </div>
+    <div class="content-flex">
+      <div class="content-main">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="mso">search</span>
+            <input type="text" id="searchInput" placeholder="Search name, code or email..." oninput="applyFilters()">
+          </div>
+          <div class="toolbar-sep"></div>
+          <span class="selection-info" id="selectionInfo">0 selected</span>
+          <div class="toolbar-sep" id="batchSep" style="display:none"></div>
+          <button class="btn btn-primary btn-sm" id="batchEmailBtn" style="display:none" onclick="batchSendEmail()">
+            <span class="mso">send</span> Send Email
+          </button>
+          <button class="btn btn-success btn-sm" id="batchApproveBtn" style="display:none" onclick="batchApprove()">
+            <span class="mso">check</span> Approve Selected
+          </button>
+          <button class="btn btn-danger btn-sm" id="batchRejectBtn" style="display:none" onclick="batchReject()">
+            <span class="mso">close</span> Reject Selected
+          </button>
         </div>
 
-    </main>
+        <!-- Table -->
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th class="td-check"><input type="checkbox" id="selectAllCb" onchange="toggleSelectAll(this)"></th>
+                  <th>Employee</th>
+                  <th>Email</th>
+                  <th>Days</th>
+                  <th>Corrected</th>
+                  <th>Status</th>
+                  <th>Sent At</th>
+                  <th class="td-actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr><td colspan="8"><div class="empty-state"><span class="mso">hourglass_empty</span><p>Loading data...</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-    <script>
-        async function fetchAllData() {
-            try {
-                // Fetch Settings
-                const setRes = await fetch('/api/settings');
-                const settings = await setRes.json();
-                document.getElementById('senderEmail').value = settings.sender_email;
-                document.getElementById('triggerTime').value = settings.trigger_time;
-                document.getElementById('smtpPassword').value = settings.smtp_password;
-                document.getElementById('smtpHost').value = settings.smtp_host;
-                document.getElementById('smtpPort').value = settings.smtp_port;
+      <!-- Side Panel -->
+      <div class="side-panel">
+        <div class="panel-card">
+          <div class="panel-title"><span class="mso">schedule</span>Automation</div>
+          <div class="panel-row">
+            <div class="panel-label">Target Date</div>
+            <input type="date" id="scheduleDate" class="panel-input">
+          </div>
+          <div class="panel-row">
+            <div class="panel-label">Execute Time</div>
+            <input type="time" id="scheduleTime" value="17:00" class="panel-input">
+          </div>
+          <button class="panel-btn-full btn btn-outline" onclick="updateSchedule()" style="margin-bottom:10px">
+            <span class="mso">update</span> Update Schedule
+          </button>
+          <button class="panel-btn-full btn btn-primary" onclick="sendAllUnverified()">
+            <span class="mso">send</span> Send to All Unverified
+          </button>
+          <div class="schedule-info" id="scheduleInfo">Sends to employees with no pending email</div>
+        </div>
 
-                // Fetch Metrics
-                const dashRes = await fetch('/api/dashboard_data');
-                const data = await dashRes.json();
-                document.getElementById('metricsRow').innerHTML = `
-                    <div class="metric-box"><div class="metric-value blue">${data.total_employees}</div><div class="metric-label">Total Employees</div></div>
-                    <div class="metric-box"><div class="metric-value red">${data.exceptions.filter(e => e.status === 'OPEN').length}</div><div class="metric-label">Open Exceptions</div></div>
-                    <div class="metric-box"><div class="metric-value amber">${data.rules.filter(r => r.is_active).length}</div><div class="metric-label">Active Rules</div></div>
-                    <div class="metric-box"><div class="metric-value green">${data.snapshots.length}</div><div class="metric-label">Snapshots</div></div>
-                `;
+        <div class="panel-card">
+          <div class="panel-title"><span class="mso">info</span>Status Guide</div>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-neutral">No Action</span>No email sent yet</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-info">Email Sent</span>Awaiting response</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-purple">Response</span>Pending review</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-success">Approved</span>Attendance confirmed</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-danger">Rejected</span>Correction declined</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-warning">Expired</span>Link expired</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-                // Fetch Employees
-                const empRes = await fetch('/api/employees');
-                const employees = await empRes.json();
-                
-                const empBody = document.getElementById('employeesTableBody');
-                empBody.innerHTML = '';
-                employees.forEach(emp => {
-                    empBody.innerHTML += `
-                        <tr class="row-enter">
-                            <td><input type="checkbox" class="emp-checkbox" value="${emp.employee_code}"></td>
-                            <td style="font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--accent-cyan)">${emp.employee_code}</td>
-                            <td>${emp.full_name}</td>
-                            <td>${emp.email}</td>
-                            <td>${emp.days_worked}</td>
-                            <td>${emp.approved_leaves}</td>
-                            <td style="color:${emp.unapproved_absences > 0 ? 'var(--accent-red)' : 'white'}">${emp.unapproved_absences}</td>
-                        </tr>
-                    `;
-                });
+<div id="toast"></div>
 
-            } catch (error) {
-                console.error("Failed to fetch data", error);
-            }
-        }
+<script>
+let allData = [];
+let filteredData = [];
+let selectedCodes = new Set();
+let activeFilter = '';
 
-        async function saveSettings() {
-            const sender = document.getElementById('senderEmail').value;
-            const time = document.getElementById('triggerTime').value;
-            const pwd = document.getElementById('smtpPassword').value;
-            const host = document.getElementById('smtpHost').value;
-            const port = parseInt(document.getElementById('smtpPort').value);
-            
-            try {
-                const res = await fetch('/api/settings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        sender_email: sender, 
-                        trigger_time: time,
-                        smtp_password: pwd,
-                        smtp_host: host,
-                        smtp_port: port
-                    })
-                });
-                if(res.ok) {
-                    alert('Settings saved successfully!');
-                }
-            } catch(e) {
-                console.error(e);
-            }
-        }
+// ── Data Fetching ──────────────────────────────────────────────────────────
+async function fetchEmployees() {
+  try {
+    const res = await fetch('/api/employees');
+    allData = await res.json();
+    updateCounts();
+    applyFilters();
+  } catch(e) {
+    showToast('Failed to load data: ' + e.message, 'error');
+  }
+}
 
-        function toggleAll() {
-            const selectAll = document.getElementById('selectAll').checked;
-            const checkboxes = document.querySelectorAll('.emp-checkbox');
-            checkboxes.forEach(cb => cb.checked = selectAll);
-        }
+function updateCounts() {
+  document.getElementById('cnt-all').textContent = allData.length;
+  document.getElementById('cnt-noa').textContent = allData.filter(e => e.status === 'No Action Taken').length;
+  document.getElementById('cnt-sent').textContent = allData.filter(e => e.status === 'Email Sent').length;
+  document.getElementById('cnt-resp').textContent = allData.filter(e => e.status === 'Response Received').length;
+  document.getElementById('cnt-appr').textContent = allData.filter(e => e.status === 'Approved').length;
+  document.getElementById('cnt-rej').textContent = allData.filter(e => e.status === 'Rejected').length;
+}
 
-        async function sendEmails() {
-            const checkboxes = document.querySelectorAll('.emp-checkbox:checked');
-            const codes = Array.from(checkboxes).map(cb => cb.value);
-            
-            if(codes.length === 0) {
-                alert("Please select at least one employee.");
-                return;
-            }
-            
-            try {
-                const res = await fetch('/api/send_email', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ employee_codes: codes })
-                });
-                const data = await res.json();
-                alert(data.message);
-                
-                checkboxes.forEach(cb => cb.checked = false);
-                document.getElementById('selectAll').checked = false;
-            } catch(e) {
-                console.error(e);
-            }
-        }
+function filterByStatus(status) {
+  activeFilter = status;
+  document.getElementById('searchInput').value = '';
+  applyFilters();
+  // Update sidebar active state
+  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+}
 
-        async function runPipeline() {
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('runPipelineBtn').disabled = true;
-            try {
-                const response = await fetch('/api/run_pipeline', { method: 'POST' });
-                const data = await response.json();
-                if (data.status === 'success') {
-                    await fetchAllData();
-                } else {
-                    alert('Pipeline run failed.');
-                }
-            } catch(e) {
-                console.error(e);
-                alert('Pipeline run error.');
-            } finally {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('runPipelineBtn').disabled = false;
-            }
-        }
+function applyFilters() {
+  const term = document.getElementById('searchInput').value.toLowerCase();
+  filteredData = allData.filter(emp => {
+    const matchSearch = !term || emp.name.toLowerCase().includes(term) || emp.code.toLowerCase().includes(term) || emp.email.toLowerCase().includes(term);
+    const matchFilter = !activeFilter || emp.status === activeFilter;
+    return matchSearch && matchFilter;
+  });
+  renderTable();
+}
 
-        // Initial Load
-        document.addEventListener('DOMContentLoaded', fetchAllData);
-    </script>
+// ── Rendering ──────────────────────────────────────────────────────────────
+function badge(status) {
+  const map = {
+    'No Action Taken': ['badge-neutral', 'radio_button_unchecked', 'No Action'],
+    'Email Sent':      ['badge-info', 'mail', 'Email Sent'],
+    'Response Received':['badge-purple','mark_email_read','Response'],
+    'Approved':        ['badge-success','check_circle','Approved'],
+    'Rejected':        ['badge-danger','cancel','Rejected'],
+    'Expired':         ['badge-warning','timer_off','Expired'],
+  };
+  const [cls, icon, label] = map[status] || ['badge-neutral','help_outline', status || 'Unknown'];
+  return `<span class="badge ${cls}"><span class="mso" style="font-size:13px">${icon}</span>${label}</span>`;
+}
+
+function rowActions(emp) {
+  const c = emp.code;
+  if (emp.status === 'No Action Taken' || emp.status === 'Expired') {
+    return `<div class="action-row">
+      <button class="btn btn-primary btn-sm" onclick="sendEmail(['${c}'])"><span class="mso" style="font-size:14px">send</span>Send Email</button>
+    </div>`;
+  }
+  if (emp.status === 'Email Sent') {
+    return `<div class="action-row">
+      <button class="btn btn-outline btn-sm" onclick="sendEmail(['${c}'])"><span class="mso" style="font-size:14px">refresh</span>Resend</button>
+      <button class="action-btn orange" title="Expire Link" onclick="expireToken('${c}')"><span class="mso">timer_off</span></button>
+    </div>`;
+  }
+  if (emp.status === 'Response Received') {
+    return `<div class="action-row">
+      <button class="action-btn green" title="Approve" onclick="approveEmployee('${c}')"><span class="mso">check_circle</span></button>
+      <button class="action-btn red" title="Reject" onclick="rejectEmployee('${c}')"><span class="mso">cancel</span></button>
+      <button class="btn btn-outline btn-sm" onclick="sendEmail(['${c}'])"><span class="mso" style="font-size:14px">refresh</span>Resend</button>
+    </div>`;
+  }
+  if (emp.status === 'Approved' || emp.status === 'Rejected') {
+    return `<div class="action-row">
+      <button class="btn btn-outline btn-sm" onclick="sendEmail(['${c}'])"><span class="mso" style="font-size:14px">send</span>Resend</button>
+    </div>`;
+  }
+  return '';
+}
+
+function fmtDate(iso) {
+  if (!iso) return '<span style="color:var(--text-faint)">—</span>';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', {day:'2-digit', month:'short'}) + ' ' + d.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  if (filteredData.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span class="mso">search_off</span><p>No employees match the current filter.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filteredData.map(emp => {
+    const sel = selectedCodes.has(emp.code);
+    const corr = emp.correctedDays ? `<span style="color:var(--brand);font-weight:600">${emp.correctedDays}</span>` : '<span style="color:var(--text-faint)">—</span>';
+    return `<tr class="${sel ? 'selected' : ''}">
+      <td class="td-check"><input type="checkbox" data-code="${emp.code}" ${sel ? 'checked' : ''} onchange="toggleSelect(this,'${emp.code}')"></td>
+      <td><div style="font-weight:500">${emp.name}</div><div style="font-size:11px;color:var(--text-faint)">${emp.code}</div></td>
+      <td style="color:var(--text-muted);font-size:12px">${emp.email}</td>
+      <td>${emp.currentDays}</td>
+      <td>${corr}</td>
+      <td>${badge(emp.status)}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${fmtDate(emp.sentAt)}</td>
+      <td class="td-actions">${rowActions(emp)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Selection ──────────────────────────────────────────────────────────────
+function toggleSelectAll(cb) {
+  if (cb.checked) { filteredData.forEach(e => selectedCodes.add(e.code)); }
+  else { filteredData.forEach(e => selectedCodes.delete(e.code)); }
+  updateSelectionUI();
+  renderTable();
+}
+
+function toggleSelect(cb, code) {
+  if (cb.checked) selectedCodes.add(code); else selectedCodes.delete(code);
+  updateSelectionUI();
+  const row = cb.closest('tr');
+  row.classList.toggle('selected', cb.checked);
+}
+
+function updateSelectionUI() {
+  const n = selectedCodes.size;
+  document.getElementById('selectionInfo').textContent = n === 0 ? '0 selected' : `${n} selected`;
+  const hasAny = n > 0;
+  const selEmps = allData.filter(e => selectedCodes.has(e.code));
+  const hasUnverified = selEmps.some(e => e.status === 'No Action Taken' || e.status === 'Expired' || e.status === 'Rejected');
+  const hasResponseReceived = selEmps.some(e => e.status === 'Response Received');
+
+  document.getElementById('batchSep').style.display = hasAny ? '' : 'none';
+  document.getElementById('batchEmailBtn').style.display = hasUnverified ? '' : 'none';
+  document.getElementById('batchApproveBtn').style.display = hasResponseReceived ? '' : 'none';
+  document.getElementById('batchRejectBtn').style.display = hasResponseReceived ? '' : 'none';
+}
+
+// ── API Actions ────────────────────────────────────────────────────────────
+async function sendEmail(codes) {
+  showToast('Sending email...', 'info');
+  const res = await fetch('/api/send_email', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({employee_codes: codes})});
+  const data = await res.json();
+  if (data.status === 'success') { showToast(data.message, 'success'); fetchEmployees(); }
+  else showToast(data.message || 'Failed to send email', 'error');
+}
+
+async function expireToken(code) {
+  if (!confirm('Expire the active email link for this employee?')) return;
+  const res = await fetch('/api/expire_token', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({employee_code: code})});
+  const data = await res.json();
+  if (data.status === 'success') { showToast('Link expired', 'success'); fetchEmployees(); }
+  else showToast(data.message || 'Error', 'error');
+}
+
+async function approveEmployee(code) {
+  const res = await fetch('/api/approve_correction', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({employee_code: code})});
+  const data = await res.json();
+  if (data.status === 'success') { showToast('Approved!', 'success'); fetchEmployees(); }
+  else showToast(data.message || 'Error', 'error');
+}
+
+async function rejectEmployee(code) {
+  const res = await fetch('/api/reject_correction', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({employee_code: code})});
+  const data = await res.json();
+  if (data.status === 'success') { showToast('Rejected', 'info'); fetchEmployees(); }
+  else showToast(data.message || 'Error', 'error');
+}
+
+async function batchSendEmail() {
+  const codes = [...selectedCodes].filter(c => {
+    const e = allData.find(x => x.code === c);
+    return e && (e.status === 'No Action Taken' || e.status === 'Expired' || e.status === 'Rejected');
+  });
+  if (!codes.length) { showToast('No eligible employees selected', 'info'); return; }
+  await sendEmail(codes);
+  selectedCodes.clear(); updateSelectionUI();
+}
+
+async function batchApprove() {
+  const codes = [...selectedCodes].filter(c => { const e = allData.find(x => x.code === c); return e && e.status === 'Response Received'; });
+  for (const code of codes) await approveEmployee(code);
+  selectedCodes.clear(); updateSelectionUI();
+}
+
+async function batchReject() {
+  const codes = [...selectedCodes].filter(c => { const e = allData.find(x => x.code === c); return e && e.status === 'Response Received'; });
+  for (const code of codes) await rejectEmployee(code);
+  selectedCodes.clear(); updateSelectionUI();
+}
+
+async function sendAllUnverified() {
+  const codes = allData.filter(e => e.status === 'No Action Taken' || e.status === 'Expired').map(e => e.code);
+  if (!codes.length) { showToast('No uncontacted employees found', 'info'); return; }
+  await sendEmail(codes);
+}
+
+async function updateSchedule() {
+  const time = document.getElementById('scheduleTime').value;
+  const date = document.getElementById('scheduleDate').value;
+  const res = await fetch('/api/set_schedule', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({time, date})});
+  const data = await res.json();
+  if (data.status === 'success') showToast(`Schedule updated to ${time}`, 'success');
+  else showToast(data.message || 'Error updating schedule', 'error');
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const container = document.getElementById('toast');
+  const el = document.createElement('div');
+  el.className = `toast-item ${type}`;
+  const icons = {success:'check_circle', error:'error', info:'info'};
+  el.innerHTML = `<span class="mso">${icons[type]||'info'}</span>${msg}`;
+  container.appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transform='translateX(100%)'; el.style.transition='all .3s'; setTimeout(()=>el.remove(), 300); }, 3500);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+document.getElementById('scheduleDate').valueAsDate = tomorrow;
+fetchEmployees();
+setInterval(fetchEmployees, 8000);
+</script>
+
+<!-- Settings Modal -->
+<div id="settingsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(0,0,0,.2);overflow:hidden">
+    <div style="background:var(--brand);color:#fff;padding:20px 24px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="mso">settings</span>SMTP Settings</div>
+      <button onclick="closeSettings()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center">&times;</button>
+    </div>
+    <div style="padding:24px;display:flex;flex-direction:column;gap:14px">
+      <div style="background:#fff3e0;border:1px solid #ffcc80;border-radius:8px;padding:12px 14px;font-size:13px;color:#e65100">
+        <strong>Gmail users:</strong> Use an <em>App Password</em> not your regular password.<br>
+        Go to <strong>Google Account → Security → 2-Step Verification → App Passwords</strong>.
+      </div>
+      <div>
+        <div class="panel-label" style="margin-bottom:4px">Sender Email</div>
+        <input id="s_email" type="email" class="panel-input" placeholder="yourname@gmail.com">
+      </div>
+      <div>
+        <div class="panel-label" style="margin-bottom:4px">App Password</div>
+        <input id="s_pass" type="password" class="panel-input" placeholder="16-character app password">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 100px;gap:10px">
+        <div>
+          <div class="panel-label" style="margin-bottom:4px">SMTP Host</div>
+          <input id="s_host" type="text" class="panel-input" value="smtp.gmail.com">
+        </div>
+        <div>
+          <div class="panel-label" style="margin-bottom:4px">Port</div>
+          <input id="s_port" type="number" class="panel-input" value="587">
+        </div>
+      </div>
+      <div>
+        <div class="panel-label" style="margin-bottom:4px">Trigger Time (for scheduler)</div>
+        <input id="s_time" type="time" class="panel-input" value="17:00">
+      </div>
+      <button onclick="saveSettings()" class="btn btn-primary" style="width:100%;padding:11px;justify-content:center;font-size:14px">
+        <span class="mso">save</span> Save Settings
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+async function openSettings() {
+  const res = await fetch('/api/settings');
+  const s = await res.json();
+  document.getElementById('s_email').value = s.sender_email || '';
+  document.getElementById('s_pass').value = '';
+  document.getElementById('s_host').value = s.smtp_host || 'smtp.gmail.com';
+  document.getElementById('s_port').value = s.smtp_port || 587;
+  document.getElementById('s_time').value = s.trigger_time || '17:00';
+  document.getElementById('settingsModal').style.display = 'flex';
+}
+function closeSettings() {
+  document.getElementById('settingsModal').style.display = 'none';
+}
+async function saveSettings() {
+  const payload = {
+    sender_email: document.getElementById('s_email').value,
+    smtp_password: document.getElementById('s_pass').value || '********',
+    smtp_host: document.getElementById('s_host').value,
+    smtp_port: parseInt(document.getElementById('s_port').value),
+    trigger_time: document.getElementById('s_time').value,
+  };
+  const res = await fetch('/api/settings', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  const data = await res.json();
+  if (data.status === 'success') { showToast('Settings saved successfully!', 'success'); closeSettings(); }
+  else showToast('Error saving settings: ' + (data.message||''), 'error');
+}
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+</script>
 </body>
 </html>
+

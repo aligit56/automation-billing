@@ -245,3 +245,37 @@ class SystemSettings(Base):
             "smtp_host": self.smtp_host,
             "smtp_port": self.smtp_port
         }
+
+
+class EmailToken(Base):
+    """One-time-use secure tokens for employee correction links."""
+    __tablename__ = "email_tokens"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    token = Column(String(36), unique=True, nullable=False, index=True, default=generate_uuid)
+    employee_code = Column(String(50), nullable=False, index=True)
+    is_used = Column(Boolean, default=False, nullable=False)
+    is_expired = Column(Boolean, default=False, nullable=False)
+    sent_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    expires_at = Column(DateTime, nullable=True)  # Optional auto-expiry
+    used_at = Column(DateTime, nullable=True)
+
+    def is_valid(self) -> bool:
+        """Returns True if the token can still be used."""
+        from datetime import datetime, timezone
+        if self.is_used or self.is_expired:
+            return False
+        if self.expires_at and datetime.now(timezone.utc) > self.expires_at:
+            return False
+        return True
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "token": self.token,
+            "employee_code": self.employee_code,
+            "is_used": self.is_used,
+            "is_expired": self.is_expired,
+            "sent_at": self.sent_at.isoformat() if self.sent_at else None,
+            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
+            "used_at": self.used_at.isoformat() if self.used_at else None,
+        }
