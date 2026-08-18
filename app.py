@@ -1,6 +1,8 @@
 import logging
 import uuid
 from datetime import datetime, timezone, timedelta
+from dotenv import load_dotenv, set_key, dotenv_values
+load_dotenv(dotenv_path=".env", override=False)  # Load .env on every startup
 from fastapi import FastAPI, Form
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -41,9 +43,19 @@ SessionLocal = sessionmaker(bind=engine)
 with SessionLocal() as db:
     orchestrator = AttendanceVerificationOrchestrator(db, config, mock_api=True)
     orchestrator.seed_initial_master_data("2026-08")
-    if not db.query(SystemSettings).first():
-        db.add(SystemSettings(sender_email="admin@axian.com", trigger_time="17:00"))
+    existing = db.query(SystemSettings).first()
+    if not existing:
+        # Try to seed from .env file first, then fall back to defaults
+        env_vals = dotenv_values(".env")
+        db.add(SystemSettings(
+            sender_email=env_vals.get("SMTP_SENDER_EMAIL") or os.getenv("SMTP_SENDER_EMAIL", "admin@axian.com"),
+            smtp_password=env_vals.get("SMTP_PASSWORD") or os.getenv("SMTP_PASSWORD") or None,
+            smtp_host=env_vals.get("SMTP_HOST") or os.getenv("SMTP_HOST", "smtp.gmail.com"),
+            smtp_port=int(env_vals.get("SMTP_PORT") or os.getenv("SMTP_PORT", "587")),
+            trigger_time=env_vals.get("SMTP_TRIGGER_TIME") or os.getenv("SMTP_TRIGGER_TIME", "17:00"),
+        ))
         db.commit()
+        logger.info("[Startup] SystemSettings seeded from .env / defaults")
 
 scheduler = BackgroundScheduler()
 
@@ -158,6 +170,8 @@ class EditPayload(BaseModel):
 
 class EmailPayload(BaseModel):
     employee_codes: List[str]
+    custom_subject: Optional[str] = None
+    custom_body: Optional[str] = None
 
 class ExpirePayload(BaseModel):
     employee_code: str
@@ -221,7 +235,7 @@ def expire_token(payload: ExpirePayload):
         update_excel_status("dummy_attendance_records.xlsx", payload.employee_code, "Expired")
         return {"status": "success"}
 
-def _send_emails(employee_codes, db_session):
+def _send_emails(employee_codes, db_session, custom_subject=None, custom_body=None):
     settings = db_session.query(SystemSettings).first()
     if not settings or not settings.smtp_password:
         return {"status": "error", "message": "SMTP credentials not configured in settings."}
@@ -251,11 +265,21 @@ def _send_emails(employee_codes, db_session):
             approved_leaves = emp.get("approved_leaves", 0)
             unapproved_absences = emp.get("unapproved_absences", 0)
             correction_link = f"{public_url}/correction?token={new_token}"
+
+            subject = custom_subject or "Action Required: Attendance Verification"
             msg = MIMEMultipart("alternative")
-            msg['Subject'] = 'Action Required: Attendance Verification'
+            msg['Subject'] = subject
             msg['From'] = sender
             msg['To'] = emp_email
-            html = f"""<html><head><style>body{{font-family:'Segoe UI',Arial,sans-serif;color:#333;line-height:1.6;background:#f0f4f8;padding:20px;margin:0}}.wrapper{{max-width:620px;margin:0 auto}}.header{{background:#1a237e;color:#fff;padding:24px 30px;border-radius:8px 8px 0 0}}.header h1{{margin:0;font-size:20px;font-weight:600}}.header p{{margin:4px 0 0;font-size:13px;opacity:.8}}.body{{background:#fff;padding:30px;border:1px solid #e0e0e0;border-top:none}}.stat-grid{{display:flex;gap:12px;margin:20px 0}}.stat-box{{flex:1;text-align:center;padding:16px 10px;background:#f5f7ff;border-radius:8px;border:1px solid #e8eaf6}}.stat-num{{font-size:28px;font-weight:700;color:#1a237e;display:block}}.stat-label{{font-size:12px;color:#666;margin-top:4px}}.stat-box.warn .stat-num{{color:#c62828}}.stat-box.warn{{background:#fff5f5;border-color:#ffcdd2}}.cta{{text-align:center;margin:28px 0 10px}}.cta a{{display:inline-block;background:#1a237e;color:#fff!important;text-decoration:none;padding:14px 36px;border-radius:6px;font-weight:600;font-size:15px}}.expiry{{text-align:center;font-size:12px;color:#999;margin-top:8px}}.footer{{background:#f5f5f5;padding:16px 30px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;text-align:center}}</style></head><body><div class="wrapper"><div class="header"><h1>Axian Attendance Verification</h1><p>Please review and confirm your attendance records for August 2026</p></div><div class="body"><p>Hello <strong>{emp_name}</strong>,</p><p>Your attendance data has been recorded. Please review and submit corrections if anything is incorrect.</p><div class="stat-grid"><div class="stat-box"><span class="stat-num">{days_worked}</span><div class="stat-label">Days Worked</div></div><div class="stat-box"><span class="stat-num">{approved_leaves}</span><div class="stat-label">Approved Leaves</div></div><div class="stat-box warn"><span class="stat-num">{unapproved_absences}</span><div class="stat-label">Unresolved Absences</div></div></div><div class="cta"><a href="{correction_link}">Review &amp; Submit Correction</a></div><div class="expiry">This link is unique to you and expires in 7 days. Do not share it.</div></div><div class="footer">Automated message from Axian Admin Panel. Do not reply.</div></div></body></html>"""
+
+            # Build email body — use custom body if provided, else default template
+            if custom_body:
+                # Wrap custom body in branded template, inject the correction link button
+                custom_body_html = custom_body.replace("\n", "<br>")
+                html = f"""<html><head><style>body{{font-family:'Segoe UI',Arial,sans-serif;color:#333;line-height:1.6;background:#f0f4f8;padding:20px;margin:0}}.wrapper{{max-width:620px;margin:0 auto}}.header{{background:#1a237e;color:#fff;padding:24px 30px;border-radius:8px 8px 0 0}}.header h1{{margin:0;font-size:20px;font-weight:600}}.body{{background:#fff;padding:30px;border:1px solid #e0e0e0;border-top:none}}.cta{{text-align:center;margin:28px 0 10px}}.cta a{{display:inline-block;background:#1a237e;color:#fff!important;text-decoration:none;padding:14px 36px;border-radius:6px;font-weight:600;font-size:15px}}.expiry{{text-align:center;font-size:12px;color:#999;margin-top:8px}}.footer{{background:#f5f5f5;padding:16px 30px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;text-align:center}}</style></head><body><div class="wrapper"><div class="header"><h1>Axian Attendance Verification</h1></div><div class="body"><p>Hello <strong>{emp_name}</strong>,</p><p>{custom_body_html}</p><div class="cta"><a href="{correction_link}">Review &amp; Submit Correction</a></div><div class="expiry">This link is unique to you and expires in 7 days. Do not share it.</div></div><div class="footer">Automated message from Axian Admin Panel. Do not reply.</div></div></body></html>"""
+            else:
+                html = f"""<html><head><style>body{{font-family:'Segoe UI',Arial,sans-serif;color:#333;line-height:1.6;background:#f0f4f8;padding:20px;margin:0}}.wrapper{{max-width:620px;margin:0 auto}}.header{{background:#1a237e;color:#fff;padding:24px 30px;border-radius:8px 8px 0 0}}.header h1{{margin:0;font-size:20px;font-weight:600}}.header p{{margin:4px 0 0;font-size:13px;opacity:.8}}.body{{background:#fff;padding:30px;border:1px solid #e0e0e0;border-top:none}}.stat-grid{{display:flex;gap:12px;margin:20px 0}}.stat-box{{flex:1;text-align:center;padding:16px 10px;background:#f5f7ff;border-radius:8px;border:1px solid #e8eaf6}}.stat-num{{font-size:28px;font-weight:700;color:#1a237e;display:block}}.stat-label{{font-size:12px;color:#666;margin-top:4px}}.stat-box.warn .stat-num{{color:#c62828}}.stat-box.warn{{background:#fff5f5;border-color:#ffcdd2}}.cta{{text-align:center;margin:28px 0 10px}}.cta a{{display:inline-block;background:#1a237e;color:#fff!important;text-decoration:none;padding:14px 36px;border-radius:6px;font-weight:600;font-size:15px}}.expiry{{text-align:center;font-size:12px;color:#999;margin-top:8px}}.footer{{background:#f5f5f5;padding:16px 30px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;text-align:center}}</style></head><body><div class="wrapper"><div class="header"><h1>Axian Attendance Verification</h1><p>Please review and confirm your attendance records for August 2026</p></div><div class="body"><p>Hello <strong>{emp_name}</strong>,</p><p>Your attendance data has been recorded. Please review and submit corrections if anything is incorrect.</p><div class="stat-grid"><div class="stat-box"><span class="stat-num">{days_worked}</span><div class="stat-label">Days Worked</div></div><div class="stat-box"><span class="stat-num">{approved_leaves}</span><div class="stat-label">Approved Leaves</div></div><div class="stat-box warn"><span class="stat-num">{unapproved_absences}</span><div class="stat-label">Unresolved Absences</div></div></div><div class="cta"><a href="{correction_link}">Review &amp; Submit Correction</a></div><div class="expiry">This link is unique to you and expires in 7 days. Do not share it.</div></div><div class="footer">Automated message from Axian Admin Panel. Do not reply.</div></div></body></html>"""
+
             part = MIMEText(html, 'html')
             msg.attach(part)
             server.send_message(msg)
@@ -274,7 +298,8 @@ def _send_emails(employee_codes, db_session):
 @app.post("/api/send_email")
 def send_email(payload: EmailPayload):
     with SessionLocal() as db:
-        return _send_emails(payload.employee_codes, db)
+        return _send_emails(payload.employee_codes, db, payload.custom_subject, payload.custom_body)
+
 
 def _error_page(title, message, icon="!"):
     return f"""<!DOCTYPE html><html lang="en"><head><title>{title} - Axian</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{{box-sizing:border-box;margin:0;padding:0}}body{{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}}.card{{background:#fff;border-radius:12px;padding:48px 40px;max-width:480px;width:100%;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.08)}}.icon{{font-size:56px;margin-bottom:20px}}h1{{font-size:22px;color:#1a237e;margin-bottom:12px}}p{{color:#555;line-height:1.6;font-size:15px}}</style></head><body><div class="card"><div class="icon">{icon}</div><h1>{title}</h1><p>{message}</p></div></body></html>"""
@@ -290,7 +315,7 @@ def get_correction_form(token: str = None, code: str = None):
         if not db_token:
             return HTMLResponse(_error_page("Link Not Found", "This link does not exist or has been removed.", "🔍"), status_code=404)
         if db_token.is_used:
-            return HTMLResponse(_error_page("Link Already Used", "You have already submitted your response using this link. If you need to make changes, please ask your administrator to resend a new email.", "✅"), status_code=410)
+            return HTMLResponse(_error_page("Response Already Submitted", "Your attendance correction has already been submitted using this link. If you need to make further changes, please ask your administrator to send a new email.", "✅"), status_code=410)
         if db_token.is_expired:
             return HTMLResponse(_error_page("Link Expired", "This link has been expired by your administrator. Please contact HR to request a new verification email.", "⏰"), status_code=410)
         if db_token.expires_at:
@@ -376,19 +401,46 @@ def get_settings():
 
 @app.post("/api/settings")
 def update_settings(payload: SettingsPayload):
+    env_path = ".env"
+    # Ensure .env file exists
+    if not os.path.exists(env_path):
+        open(env_path, "w").close()
+
     with SessionLocal() as db:
         settings = db.query(SystemSettings).first()
+        new_password = None
         if settings:
             settings.sender_email = payload.sender_email
             settings.trigger_time = payload.trigger_time
-            if payload.smtp_password and payload.smtp_password != "********": settings.smtp_password = payload.smtp_password
+            if payload.smtp_password and payload.smtp_password != "********":
+                settings.smtp_password = payload.smtp_password
+                new_password = payload.smtp_password
+            else:
+                new_password = settings.smtp_password  # keep existing
             settings.smtp_host = payload.smtp_host
             settings.smtp_port = payload.smtp_port
         else:
-            settings = SystemSettings(sender_email=payload.sender_email, trigger_time=payload.trigger_time, smtp_password=payload.smtp_password if payload.smtp_password != "********" else None, smtp_host=payload.smtp_host, smtp_port=payload.smtp_port)
+            new_password = payload.smtp_password if payload.smtp_password != "********" else None
+            settings = SystemSettings(
+                sender_email=payload.sender_email,
+                trigger_time=payload.trigger_time,
+                smtp_password=new_password,
+                smtp_host=payload.smtp_host,
+                smtp_port=payload.smtp_port,
+            )
             db.add(settings)
         db.commit()
         update_scheduler_trigger(payload.trigger_time)
+
+        # ── Persist to .env so settings survive DB resets ──────────────────
+        set_key(env_path, "SMTP_SENDER_EMAIL", payload.sender_email)
+        set_key(env_path, "SMTP_HOST", payload.smtp_host)
+        set_key(env_path, "SMTP_PORT", str(payload.smtp_port))
+        set_key(env_path, "SMTP_TRIGGER_TIME", payload.trigger_time)
+        if new_password:
+            set_key(env_path, "SMTP_PASSWORD", new_password)
+        logger.info(f"[Settings] Saved to DB and .env — sender: {payload.sender_email}")
+
         return {"status": "success", "settings": settings.to_dict()}
 
 @app.post("/api/run_pipeline")

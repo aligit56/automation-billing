@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -33,12 +33,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 
 /* ── Layout ── */
 .main{display:flex;flex:1;min-height:0}
-.sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0}
-.sidebar-section{padding:8px 16px 4px;font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:.8px;text-transform:uppercase}
-.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .15s;border-radius:0;border-left:3px solid transparent}
+.sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1);position:relative;overflow:hidden}
+.sidebar-section{padding:16px 20px 8px;font-size:13px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);white-space:nowrap;overflow:hidden;max-height:50px}
+.sidebar-item{position:relative;display:flex;align-items:center;gap:14px;padding:16px 20px;font-size:15.5px;font-weight:500;color:#334155;cursor:pointer;transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);border-radius:0;border-left:4px solid transparent;white-space:nowrap;overflow:hidden}
+.sidebar-item .mso{font-size:22px; color:var(--text-muted); flex-shrink:0}
 .sidebar-item:hover{background:var(--brand-pale);color:var(--brand)}
-.sidebar-item.active{background:var(--brand-pale);color:var(--brand);border-left-color:var(--brand)}
-.content{flex:1;padding:24px;overflow-y:auto;min-width:0}
+.sidebar-item:hover .mso{color:var(--brand)}
+.sidebar-item.active{background:var(--brand-pale);color:var(--brand);border-left-color:var(--brand);font-weight:600}
+.sidebar-item.active .mso{color:var(--brand)}
+.sidebar-item .item-label{white-space:nowrap;transition:opacity 0.2s}
+.nav-badge{background:var(--danger);color:#fff;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:12px;margin-left:auto;line-height:1.2;transition:all .2s;box-shadow:0 2px 4px rgba(220,38,38,0.3)}
+
+/* Collapsed State */
+.sidebar.collapsed{width:80px}
+.sidebar.collapsed .sidebar-section{opacity:0;pointer-events:none;max-height:0;padding-top:0;padding-bottom:0;margin:0}
+.sidebar.collapsed .sidebar-item{padding-left:27px;padding-right:0}
+.sidebar.collapsed .sidebar-item .item-label{opacity:0}
+.sidebar.collapsed .sidebar-item.active{background:var(--brand-pale)}
+.sidebar.collapsed .nav-badge{position:absolute;top:10px;left:42px;margin-left:0;padding:2px 5px;font-size:10px;border:2px solid var(--surface)}
+
+.content{flex:1;padding:24px;overflow-y:auto;min-width:0;transition:padding 0.3s ease}
 
 /* ── Page Title ── */
 .page-header{margin-bottom:20px}
@@ -77,18 +91,31 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 /* ── Table ── */
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .table-scroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-thead th{padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.5px;background:#f8fafc;border-bottom:1px solid var(--border);white-space:nowrap}
+table{width:100%;border-collapse:collapse;font-size:14.5px;transition:all 0.3s ease}
+thead th{padding:14px 18px;text-align:left;font-size:12px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.5px;background:#f8fafc;border-bottom:1px solid var(--border);white-space:nowrap;transition:all 0.3s ease}
 tbody tr{border-bottom:1px solid #f1f5f9;transition:background .15s}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:#f8fafc}
 tbody tr.selected{background:var(--brand-pale)}
-td{padding:11px 14px;white-space:nowrap;vertical-align:middle}
-.td-check{width:40px}
+td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3s ease}
+.td-check{width:46px}
 .td-actions{text-align:right}
 
+/* ── Table Zoom Levels ── */
+.content.table-zoom-1 table { font-size: 16px; }
+.content.table-zoom-1 thead th { font-size: 13px; padding: 18px 24px; }
+.content.table-zoom-1 td { padding: 20px 24px; }
+.content.table-zoom-1 .badge { font-size: 13.5px; padding: 6px 14px; }
+.content.table-zoom-1 .btn-sm { font-size: 13.5px; padding: 7px 12px; }
+
+.content.table-zoom-2 table { font-size: 17.5px; }
+.content.table-zoom-2 thead th { font-size: 14px; padding: 22px 28px; }
+.content.table-zoom-2 td { padding: 26px 28px; }
+.content.table-zoom-2 .badge { font-size: 14.5px; padding: 7px 16px; }
+.content.table-zoom-2 .btn-sm { font-size: 14.5px; padding: 9px 14px; }
+
 /* ── Badges ── */
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12.5px;font-weight:600;white-space:nowrap;transition:all 0.3s ease}
 .badge .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .badge-success{background:var(--success-bg);color:var(--success);border:1px solid var(--success-border)}
 .badge-danger{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger-border)}
@@ -107,8 +134,19 @@ td{padding:11px 14px;white-space:nowrap;vertical-align:middle}
 .action-btn.orange:hover{background:var(--warning-bg);color:var(--warning)}
 .action-btn.blue:hover{background:var(--info-bg);color:var(--info)}
 
+/* ── Layout switch ── */
+.content-flex{display:flex;gap:20px;align-items:stretch}
+.content-main{flex:1;min-width:0}
+
 /* ── Side Panel ── */
-.side-panel{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:16px}
+.right-panel-wrapper{display:flex;flex-shrink:0;transition:all 0.3s ease;align-items:flex-start}
+.side-panel{width:320px;display:flex;flex-direction:column;gap:16px;transition:all 0.3s ease;overflow:hidden;align-self:flex-start}
+.right-panel-wrapper.collapsed .side-panel{width:0;opacity:0;pointer-events:none;margin:0;padding:0}
+
+.email-toggle-bar{display:flex;width:32px;background:var(--brand);color:#fff;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:600;cursor:pointer;border-radius:var(--radius-sm) 0 0 var(--radius-sm);box-shadow:var(--shadow);transition:all 0.2s;padding:20px 0;letter-spacing:1px;position:sticky;top:50vh;transform:translateY(-50%);z-index:50}
+.email-toggle-bar:hover{background:var(--brand-light);padding-right:4px}
+.email-toggle-bar span{display:block;line-height:1.4;margin:2px 0}
+
 .panel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
 .panel-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .panel-row{margin-bottom:12px}
@@ -134,11 +172,6 @@ td{padding:11px 14px;white-space:nowrap;vertical-align:middle}
 /* ── Spinner ── */
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── Layout switch ── */
-.content-flex{display:flex;gap:20px;align-items:flex-start}
-.content-main{flex:1;min-width:0}
-
 @media(max-width:1200px){.stats-row{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:900px){.sidebar{display:none}.side-panel{width:100%}.content-flex{flex-direction:column}}
 </style>
@@ -147,6 +180,9 @@ td{padding:11px 14px;white-space:nowrap;vertical-align:middle}
 
 <!-- Topbar -->
 <div class="topbar">
+  <button class="topbar-refresh" onclick="toggleSidebar()" style="margin-right:12px; padding:6px; background:transparent">
+    <span class="mso">menu</span>
+  </button>
   <div>
     <div class="topbar-logo">Axian Attendance</div>
     <div class="topbar-sub">Admin Portal</div>
@@ -161,24 +197,39 @@ td{padding:11px 14px;white-space:nowrap;vertical-align:middle}
 
 <div class="main">
   <!-- Sidebar -->
-  <div class="sidebar">
+  <div class="sidebar" id="appSidebar">
     <div class="sidebar-section">Navigation</div>
-    <div class="sidebar-item active"><span class="mso">grid_view</span>Dashboard</div>
-    <div class="sidebar-section" style="margin-top:12px">Quick Filters</div>
-    <div class="sidebar-item" onclick="filterByStatus('No Action Taken')"><span class="mso">radio_button_unchecked</span>No Action</div>
-    <div class="sidebar-item" onclick="filterByStatus('Email Sent')"><span class="mso">mail</span>Email Sent</div>
-    <div class="sidebar-item" onclick="filterByStatus('Response Received')"><span class="mso">mark_email_read</span>Responses</div>
-    <div class="sidebar-item" onclick="filterByStatus('Approved')"><span class="mso">check_circle</span>Approved</div>
-    <div class="sidebar-item" onclick="filterByStatus('Rejected')"><span class="mso">cancel</span>Rejected</div>
-    <div class="sidebar-item" onclick="filterByStatus('Expired')"><span class="mso">timer_off</span>Expired</div>
-    <div class="sidebar-item" onclick="filterByStatus('')"><span class="mso">people</span>All Employees</div>
+    <div class="sidebar-item active"><span class="mso">grid_view</span><span class="item-label">Dashboard</span></div>
+    <div class="sidebar-section" style="margin-top:12px">Filter by Status</div>
+    <div class="sidebar-item" onclick="filterByStatus('No Action Taken')" title="Not Contacted"><span class="mso">radio_button_unchecked</span><span class="item-label">Not Contacted</span></div>
+    <div class="sidebar-item" onclick="filterByStatus('Email Sent')" title="Awaiting Reply">
+      <span class="mso">mail</span><span class="item-label">Awaiting Reply</span>
+      <span id="badge-EmailSent" class="nav-badge" style="display:none">0</span>
+    </div>
+    <div class="sidebar-item" onclick="filterByStatus('Response Received')" title="Needs Your Action">
+      <span class="mso">mark_email_read</span><span class="item-label">Needs Your Action</span>
+      <span id="badge-ResponseReceived" class="nav-badge" style="display:none">0</span>
+    </div>
+    <div class="sidebar-item" onclick="filterByStatus('Approved')" title="Verified &amp; Approved">
+      <span class="mso">check_circle</span><span class="item-label">Verified &amp; Approved</span>
+      <span id="badge-Approved" class="nav-badge" style="display:none">0</span>
+    </div>
+    <div class="sidebar-item" onclick="filterByStatus('Rejected')" title="Rejected">
+      <span class="mso">cancel</span><span class="item-label">Rejected</span>
+      <span id="badge-Rejected" class="nav-badge" style="display:none">0</span>
+    </div>
+    <div class="sidebar-item" onclick="filterByStatus('Expired')" title="Link Expired">
+      <span class="mso">timer_off</span><span class="item-label">Link Expired</span>
+      <span id="badge-Expired" class="nav-badge" style="display:none">0</span>
+    </div>
+    <div class="sidebar-item" onclick="filterByStatus('')" title="All Employees"><span class="mso">people</span><span class="item-label">All Employees</span></div>
   </div>
 
   <!-- Main content -->
   <div class="content">
     <div class="page-header">
-      <div class="page-title">Overview</div>
-      <div class="page-sub">Monitor and manage employee attendance verification</div>
+      <div class="page-title">Attendance Dashboard</div>
+      <div class="page-sub">August 2026 &mdash; See who's been contacted, who replied, and who still needs attention</div>
     </div>
 
     <!-- Stat cards -->
@@ -186,32 +237,38 @@ td{padding:11px 14px;white-space:nowrap;vertical-align:middle}
       <div class="stat-card" onclick="filterByStatus('')" id="sc-all">
         <div class="stat-card-accent" style="background:#64748b"></div>
         <div class="stat-card-num" id="cnt-all" style="color:#64748b">—</div>
-        <div class="stat-card-label">Total</div>
+        <div class="stat-card-label">Total Employees</div>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:3px">All employees this period</div>
       </div>
       <div class="stat-card" onclick="filterByStatus('No Action Taken')" id="sc-noa">
         <div class="stat-card-accent" style="background:var(--neutral)"></div>
         <div class="stat-card-num" id="cnt-noa" style="color:var(--neutral)">—</div>
-        <div class="stat-card-label">No Action</div>
+        <div class="stat-card-label">Not Contacted</div>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:3px">No email sent yet</div>
       </div>
       <div class="stat-card" onclick="filterByStatus('Email Sent')" id="sc-sent">
         <div class="stat-card-accent" style="background:var(--info)"></div>
         <div class="stat-card-num" id="cnt-sent" style="color:var(--info)">—</div>
-        <div class="stat-card-label">Email Sent</div>
+        <div class="stat-card-label">Awaiting Reply</div>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:3px">Email sent, waiting for response</div>
       </div>
       <div class="stat-card" onclick="filterByStatus('Response Received')" id="sc-resp">
         <div class="stat-card-accent" style="background:var(--purple)"></div>
         <div class="stat-card-num" id="cnt-resp" style="color:var(--purple)">—</div>
-        <div class="stat-card-label">Responses</div>
+        <div class="stat-card-label">Needs Your Action</div>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:3px">Employee replied, review now</div>
       </div>
       <div class="stat-card" onclick="filterByStatus('Approved')" id="sc-appr">
         <div class="stat-card-accent" style="background:var(--success)"></div>
         <div class="stat-card-num" id="cnt-appr" style="color:var(--success)">—</div>
-        <div class="stat-card-label">Approved</div>
+        <div class="stat-card-label">Verified &amp; Approved</div>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:3px">Attendance confirmed ✓</div>
       </div>
       <div class="stat-card" onclick="filterByStatus('Rejected')" id="sc-rej">
         <div class="stat-card-accent" style="background:var(--danger)"></div>
         <div class="stat-card-num" id="cnt-rej" style="color:var(--danger)">—</div>
         <div class="stat-card-label">Rejected</div>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:3px">Correction not accepted</div>
       </div>
     </div>
 
@@ -261,37 +318,68 @@ td{padding:11px 14px;white-space:nowrap;vertical-align:middle}
         </div>
       </div>
 
-      <!-- Side Panel -->
-      <div class="side-panel">
-        <div class="panel-card">
-          <div class="panel-title"><span class="mso">schedule</span>Automation</div>
+      <!-- Right Panel Wrapper -->
+      <div class="right-panel-wrapper collapsed" id="rightSidebarWrapper">
+        <div class="email-toggle-bar" onclick="toggleRightPanel()" title="Open Email Composer">
+          <span>E</span><span>M</span><span>A</span><span>I</span><span>L</span>
+        </div>
+        
+        <!-- Side Panel: Email Composer -->
+        <div class="side-panel">
+          <div class="panel-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <div class="panel-title" style="margin-bottom:0;"><span class="mso">edit_note</span>Email Composer</div>
+            </div>
+
           <div class="panel-row">
-            <div class="panel-label">Target Date</div>
-            <input type="date" id="scheduleDate" class="panel-input">
+            <div class="panel-label">Send To</div>
+            <select id="recipientGroup" class="panel-input" onchange="onRecipientChange()" style="cursor:pointer">
+              <option value="No Action Taken">Not Contacted</option>
+              <option value="Email Sent">Awaiting Reply</option>
+              <option value="Response Received">Needs Your Action</option>
+              <option value="Approved">Verified &amp; Approved</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Expired">Link Expired</option>
+              <option value="all">All Employees</option>
+              <option value="custom">Custom Selection (use checkboxes)</option>
+            </select>
           </div>
+
+          <div id="customSelectionNote" style="display:none;background:var(--brand-pale);border:1px solid var(--brand);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--brand);margin-bottom:10px">
+            <span class="mso" style="font-size:14px;vertical-align:middle">info</span>
+            Tick the checkboxes in the table to select employees, then click Send below.
+          </div>
+
           <div class="panel-row">
-            <div class="panel-label">Execute Time</div>
-            <input type="time" id="scheduleTime" value="17:00" class="panel-input">
+            <div class="panel-label">Email Subject</div>
+            <input type="text" id="emailSubject" class="panel-input" placeholder="Action Required: Attendance Verification" value="Action Required: Attendance Verification">
           </div>
-          <button class="panel-btn-full btn btn-outline" onclick="updateSchedule()" style="margin-bottom:10px">
-            <span class="mso">update</span> Update Schedule
-          </button>
-          <button class="panel-btn-full btn btn-primary" onclick="sendAllUnverified()">
-            <span class="mso">send</span> Send to All Unverified
-          </button>
-          <div class="schedule-info" id="scheduleInfo">Sends to employees with no pending email</div>
+
+          <div class="panel-row">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+              <div class="panel-label" style="margin-bottom:0;">Email Body</div>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-outline btn-sm" id="btnEditBody" onclick="editEmailMode()">Edit</button>
+                <button class="btn btn-success btn-sm" id="btnSaveBody" onclick="saveEmailMode()" style="display:none;">Save</button>
+                <button class="btn btn-outline btn-sm" id="btnResetBody" onclick="resetEmailMode()">Reset</button>
+              </div>
+            </div>
+            <div style="font-weight:400;font-size:10px;color:var(--text-faint); margin-bottom:6px;">(The correction link button is always added automatically)</div>
+            <textarea id="emailBody" class="panel-input" rows="8" style="resize:vertical;font-size:13px;line-height:1.5; background-color:#f8fafc; border-color:var(--border);" readonly></textarea>
+          </div>
         </div>
 
         <div class="panel-card">
           <div class="panel-title"><span class="mso">info</span>Status Guide</div>
           <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
             <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-neutral">No Action</span>No email sent yet</div>
-            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-info">Email Sent</span>Awaiting response</div>
-            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-purple">Response</span>Pending review</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-info">Awaiting</span>Waiting for response</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-purple">Review</span>Needs admin action</div>
             <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-success">Approved</span>Attendance confirmed</div>
             <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-danger">Rejected</span>Correction declined</div>
             <div style="display:flex;align-items:center;gap:8px"><span class="badge badge-warning">Expired</span>Link expired</div>
           </div>
+        </div>
         </div>
       </div>
     </div>
@@ -325,14 +413,54 @@ function updateCounts() {
   document.getElementById('cnt-resp').textContent = allData.filter(e => e.status === 'Response Received').length;
   document.getElementById('cnt-appr').textContent = allData.filter(e => e.status === 'Approved').length;
   document.getElementById('cnt-rej').textContent = allData.filter(e => e.status === 'Rejected').length;
+  
+  // ── Dynamic Nav Badges ──
+  const badgeConfig = [
+    { id: 'Email Sent', key: 'ack_EmailSent', color: 'var(--info)' },
+    { id: 'Response Received', key: 'ack_ResponseReceived', color: 'var(--purple)' },
+    { id: 'Approved', key: 'ack_Approved', color: 'var(--success)' },
+    { id: 'Rejected', key: 'ack_Rejected', color: 'var(--danger)' },
+    { id: 'Expired', key: 'ack_Expired', color: 'var(--text-muted)' }
+  ];
+
+  badgeConfig.forEach(b => {
+    const count = allData.filter(e => e.status === b.id).length;
+    let ack = parseInt(localStorage.getItem(b.key) || '0');
+    
+    // Auto-clear unread if we are looking at them, or if count dropped
+    if (activeFilter === b.id || count < ack) {
+      ack = count;
+      localStorage.setItem(b.key, ack.toString());
+    }
+    
+    const unread = count - ack;
+    const safeId = b.id.replace(/\s/g, '');
+    const badgeEl = document.getElementById('badge-' + safeId);
+    
+    if (badgeEl) {
+      if (unread > 0 && activeFilter !== b.id) {
+        badgeEl.textContent = unread;
+        badgeEl.style.display = 'inline-block';
+        badgeEl.style.backgroundColor = b.color;
+      } else {
+        badgeEl.style.display = 'none';
+      }
+    }
+  });
 }
 
 function filterByStatus(status) {
   activeFilter = status;
   document.getElementById('searchInput').value = '';
   applyFilters();
+  updateCounts();
   // Update sidebar active state
-  document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.classList.remove('active');
+    if (el.getAttribute('onclick') === `filterByStatus('${status}')`) {
+      el.classList.add('active');
+    }
+  });
 }
 
 function applyFilters() {
@@ -416,15 +544,25 @@ function renderTable() {
 }
 
 // ── Selection ──────────────────────────────────────────────────────────────
+function setComposerToCustom() {
+  const dd = document.getElementById('recipientGroup');
+  if (dd && dd.value !== 'custom') {
+    dd.value = 'custom';
+    document.getElementById('customSelectionNote').style.display = 'block';
+  }
+}
+
 function toggleSelectAll(cb) {
   if (cb.checked) { filteredData.forEach(e => selectedCodes.add(e.code)); }
   else { filteredData.forEach(e => selectedCodes.delete(e.code)); }
+  setComposerToCustom();
   updateSelectionUI();
   renderTable();
 }
 
 function toggleSelect(cb, code) {
   if (cb.checked) selectedCodes.add(code); else selectedCodes.delete(code);
+  setComposerToCustom();
   updateSelectionUI();
   const row = cb.closest('tr');
   row.classList.toggle('selected', cb.checked);
@@ -435,11 +573,10 @@ function updateSelectionUI() {
   document.getElementById('selectionInfo').textContent = n === 0 ? '0 selected' : `${n} selected`;
   const hasAny = n > 0;
   const selEmps = allData.filter(e => selectedCodes.has(e.code));
-  const hasUnverified = selEmps.some(e => e.status === 'No Action Taken' || e.status === 'Expired' || e.status === 'Rejected');
   const hasResponseReceived = selEmps.some(e => e.status === 'Response Received');
 
   document.getElementById('batchSep').style.display = hasAny ? '' : 'none';
-  document.getElementById('batchEmailBtn').style.display = hasUnverified ? '' : 'none';
+  document.getElementById('batchEmailBtn').style.display = hasAny ? '' : 'none';
   document.getElementById('batchApproveBtn').style.display = hasResponseReceived ? '' : 'none';
   document.getElementById('batchRejectBtn').style.display = hasResponseReceived ? '' : 'none';
 }
@@ -447,7 +584,16 @@ function updateSelectionUI() {
 // ── API Actions ────────────────────────────────────────────────────────────
 async function sendEmail(codes) {
   showToast('Sending email...', 'info');
-  const res = await fetch('/api/send_email', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({employee_codes: codes})});
+  const subject = document.getElementById('emailSubject').value.trim();
+  const body = document.getElementById('emailBody').value.trim();
+  
+  const payload = {
+    employee_codes: codes,
+    custom_subject: subject || null,
+    custom_body: body || null
+  };
+
+  const res = await fetch('/api/send_email', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
   const data = await res.json();
   if (data.status === 'success') { showToast(data.message, 'success'); fetchEmployees(); }
   else showToast(data.message || 'Failed to send email', 'error');
@@ -476,10 +622,7 @@ async function rejectEmployee(code) {
 }
 
 async function batchSendEmail() {
-  const codes = [...selectedCodes].filter(c => {
-    const e = allData.find(x => x.code === c);
-    return e && (e.status === 'No Action Taken' || e.status === 'Expired' || e.status === 'Rejected');
-  });
+  const codes = [...selectedCodes];
   if (!codes.length) { showToast('No eligible employees selected', 'info'); return; }
   await sendEmail(codes);
   selectedCodes.clear(); updateSelectionUI();
@@ -503,14 +646,84 @@ async function sendAllUnverified() {
   await sendEmail(codes);
 }
 
-async function updateSchedule() {
-  const time = document.getElementById('scheduleTime').value;
-  const date = document.getElementById('scheduleDate').value;
-  const res = await fetch('/api/set_schedule', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({time, date})});
-  const data = await res.json();
-  if (data.status === 'success') showToast(`Schedule updated to ${time}`, 'success');
-  else showToast(data.message || 'Error updating schedule', 'error');
+function onRecipientChange() {
+  const val = document.getElementById('recipientGroup').value;
+  document.getElementById('customSelectionNote').style.display = val === 'custom' ? 'block' : 'none';
+  
+  if (val !== 'custom') {
+    selectedCodes.clear();
+    allData.forEach(emp => {
+      if (val === 'all' || emp.status === val) {
+        selectedCodes.add(emp.code);
+      }
+    });
+    const headerCb = document.querySelector('thead .td-check input');
+    if (headerCb) headerCb.checked = (val === 'all');
+    updateSelectionUI();
+    renderTable();
+  }
 }
+
+// ── Sidebar Toggle ──────────────────────────────────────────────────────────
+function updateTableZoom() {
+  const leftCollapsed = document.getElementById('appSidebar').classList.contains('collapsed');
+  const rightCollapsed = document.getElementById('rightSidebarWrapper').classList.contains('collapsed');
+  const content = document.querySelector('.content');
+  
+  content.classList.remove('table-zoom-1', 'table-zoom-2');
+  
+  if (leftCollapsed && rightCollapsed) {
+    content.classList.add('table-zoom-2');
+  } else if (leftCollapsed || rightCollapsed) {
+    content.classList.add('table-zoom-1');
+  }
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('appSidebar');
+  sidebar.classList.toggle('collapsed');
+  updateTableZoom();
+}
+
+function toggleRightPanel() {
+  const wrapper = document.getElementById('rightSidebarWrapper');
+  wrapper.classList.toggle('collapsed');
+  updateTableZoom();
+}
+
+// ── Email Editor Mode ──────────────────────────────────────────────────────
+const DEFAULT_EMAIL_BODY = "Your attendance data has been recorded. Please review and submit corrections if anything is incorrect.";
+
+function editEmailMode() {
+  const ta = document.getElementById('emailBody');
+  ta.removeAttribute('readonly');
+  ta.style.backgroundColor = '#fff';
+  ta.style.borderColor = 'var(--brand)';
+  ta.focus();
+  document.getElementById('btnEditBody').style.display = 'none';
+  document.getElementById('btnSaveBody').style.display = 'inline-flex';
+}
+
+function saveEmailMode() {
+  const ta = document.getElementById('emailBody');
+  ta.setAttribute('readonly', 'true');
+  ta.style.backgroundColor = '#f8fafc';
+  ta.style.borderColor = 'var(--border)';
+  document.getElementById('btnSaveBody').style.display = 'none';
+  document.getElementById('btnEditBody').style.display = 'inline-flex';
+}
+
+function resetEmailMode() {
+  const ta = document.getElementById('emailBody');
+  ta.value = DEFAULT_EMAIL_BODY;
+  saveEmailMode();
+  showToast('Email body reset to default', 'info');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('emailBody').value = DEFAULT_EMAIL_BODY;
+  updateTableZoom();
+});
 
 // ── Toast ──────────────────────────────────────────────────────────────────
 function showToast(msg, type='info') {
@@ -524,8 +737,6 @@ function showToast(msg, type='info') {
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
-const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
-document.getElementById('scheduleDate').valueAsDate = tomorrow;
 fetchEmployees();
 setInterval(fetchEmployees, 8000);
 </script>
@@ -548,7 +759,7 @@ setInterval(fetchEmployees, 8000);
       </div>
       <div>
         <div class="panel-label" style="margin-bottom:4px">App Password</div>
-        <input id="s_pass" type="password" class="panel-input" placeholder="16-character app password">
+        <div id="passSection"><!-- Filled by openSettings() --></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 100px;gap:10px">
         <div>
@@ -572,15 +783,26 @@ setInterval(fetchEmployees, 8000);
 </div>
 
 <script>
+let _passAlreadySaved = false;
 async function openSettings() {
   const res = await fetch('/api/settings');
   const s = await res.json();
   document.getElementById('s_email').value = s.sender_email || '';
-  document.getElementById('s_pass').value = '';
   document.getElementById('s_host').value = s.smtp_host || 'smtp.gmail.com';
   document.getElementById('s_port').value = s.smtp_port || 587;
   document.getElementById('s_time').value = s.trigger_time || '17:00';
+  _passAlreadySaved = !!s.smtp_password;
+  const passSection = document.getElementById('passSection');
+  if (_passAlreadySaved) {
+    passSection.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:10px 14px"><span style="font-size:13px;color:#2e7d32">&#x1F512; Password saved &mdash; &#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</span><button type="button" onclick="showPasswordInput()" style="font-size:12px;background:transparent;border:1px solid #2e7d32;color:#2e7d32;border-radius:4px;padding:4px 10px;cursor:pointer">Change</button></div><input id="s_pass" type="hidden" value="********">`;
+  } else {
+    passSection.innerHTML = `<input id="s_pass" type="password" class="panel-input" placeholder="Enter 16-character app password">`;
+  }
   document.getElementById('settingsModal').style.display = 'flex';
+}
+function showPasswordInput() {
+  document.getElementById('passSection').innerHTML = `<input id="s_pass" type="password" class="panel-input" placeholder="Enter new 16-character app password" autofocus>`;
+  document.getElementById('s_pass').focus();
 }
 function closeSettings() {
   document.getElementById('settingsModal').style.display = 'none';
@@ -604,4 +826,5 @@ document.getElementById('settingsModal').addEventListener('click', function(e) {
 </script>
 </body>
 </html>
+
 

@@ -53,3 +53,6 @@ Desktop.ini
 
 # macOS
 .DS_Store
+
+# Environment secrets
+.env
