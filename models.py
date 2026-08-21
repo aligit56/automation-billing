@@ -237,13 +237,26 @@ class SystemSettings(Base):
     smtp_host = Column(String(255), nullable=False, default="smtp.gmail.com")
     smtp_port = Column(Integer, nullable=False, default=587)
     
+    # Advanced scheduling logic
+    schedule_days_before_end = Column(Integer, nullable=False, default=5)
+    schedule_reminder_days = Column(Integer, nullable=False, default=2) # Deprecated
+    reminders_json = Column(Text, nullable=True, default="[]")
+    
+    # Multiple Schedules
+    active_schedule_id = Column(String(50), nullable=True, default="default")
+    schedules_json = Column(Text, nullable=True, default="[]")
+    
     def to_dict(self) -> Dict[str, Any]:
         return {
             "sender_email": self.sender_email,
             "trigger_time": self.trigger_time,
             "smtp_password": "********" if self.smtp_password else "",
             "smtp_host": self.smtp_host,
-            "smtp_port": self.smtp_port
+            "smtp_port": self.smtp_port,
+            "schedule_days_before_end": self.schedule_days_before_end,
+            "reminders_json": self.reminders_json,
+            "active_schedule_id": self.active_schedule_id,
+            "schedules_json": self.schedules_json
         }
 
 

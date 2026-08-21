@@ -62,8 +62,86 @@ scheduler = BackgroundScheduler()
 def scheduled_job():
     logger.info("Running automated scheduled job...")
     with SessionLocal() as db:
-        orch = AttendanceVerificationOrchestrator(db, config, mock_api=True)
-        orch.run_month_end_pipeline("2026-08", auto_resolve_demo=True)
+        settings = db.query(SystemSettings).first()
+        if not settings or not settings.active_schedule_id or not settings.schedules_json:
+            logger.info("No active schedule configured. Skipping.")
+            return
+
+        import json
+        import calendar
+        from datetime import date
+        
+        try:
+            schedules = json.loads(settings.schedules_json)
+        except Exception:
+            return
+            
+        active_profile = next((p for p in schedules if p.get("id") == settings.active_schedule_id), None)
+        if not active_profile:
+            logger.info("Active schedule profile not found. Skipping.")
+            return
+            
+        today = date.today()
+        
+        is_recurring = active_profile.get("is_recurring", True)
+        if not is_recurring:
+            target_month = int(active_profile.get("target_month", today.month))
+            if today.month != target_month:
+                logger.info(f"Skipping: Schedule is for month {target_month}, but current month is {today.month}.")
+                return
+        
+        # Find the last day of the current month
+        last_day = calendar.monthrange(today.year, today.month)[1]
+        
+        days_before = int(active_profile.get("schedule_days_before_end", 5))
+        target_initial_day = last_day - days_before
+        
+        logger.info(f"Today is day {today.day}. Initial trigger day is {target_initial_day}.")
+        
+        import pandas as pd
+        if today.day == target_initial_day:
+            logger.info("Today is the initial verification day. Sending emails to all employees.")
+            try:
+                df = pd.read_excel("dummy_attendance_records.xlsx")
+                all_codes = df["employee_code"].dropna().astype(str).tolist()
+                logger.info(f"Found {len(all_codes)} employees. Triggering emails...")
+                _send_emails(all_codes, db, custom_subject="Attendance Verification Request", custom_body=active_profile.get("custom_email_body") or None)
+            except Exception as e:
+                logger.error(f"Failed to trigger emails: {e}")
+                
+        else:
+            # Check reminders
+            reminders = []
+            try:
+                reminders = json.loads(active_profile.get("reminders_json", "[]"))
+            except Exception:
+                pass
+                
+            for r in reminders:
+                days_after = int(r.get("days", 2))
+                rem_date = target_initial_day + days_after
+                if rem_date > last_day:
+                    rem_date = last_day
+                    
+                if today.day == rem_date:
+                    logger.info(f"Today is reminder day ({days_after} days after initial). Sending reminders...")
+                    try:
+                        df = pd.read_excel("dummy_attendance_records.xlsx")
+                        # Only send reminders to those who haven't approved/disputed
+                        pending_df = df[~df["status"].isin(["Approved", "Disputed", "Resolved"])]
+                        pending_codes = pending_df["employee_code"].dropna().astype(str).tolist()
+                        
+                        logger.info(f"Found {len(pending_codes)} employees who haven't responded. Triggering reminders...")
+                        if pending_codes:
+                            _send_emails(pending_codes, db, custom_subject="Reminder: Attendance Verification Request", custom_body=r.get("body") or None)
+                    except Exception as e:
+                        logger.error(f"Failed to trigger reminders: {e}")
+        
+        # Original placeholder logic for month-end:
+        if today.day == last_day:
+            logger.info("Running month-end billing pipeline...")
+            orch = AttendanceVerificationOrchestrator(db, config, mock_api=True)
+            orch.run_month_end_pipeline(f"{today.year}-{today.month:02d}", auto_resolve_demo=True)
 
 def update_scheduler_trigger(time_str: str):
     hour, minute = time_str.split(":")
@@ -178,10 +256,17 @@ class ExpirePayload(BaseModel):
 
 class SettingsPayload(BaseModel):
     sender_email: str
-    trigger_time: str
     smtp_password: str
     smtp_host: str
     smtp_port: int
+    trigger_time: Optional[str] = None
+
+class SchedulerPayload(BaseModel):
+    trigger_time: str
+    schedule_days_before_end: int
+    reminders_json: str
+    active_schedule_id: str
+    schedules_json: str
 
 @app.post("/api/set_schedule")
 def set_schedule(payload: SchedulePayload):
@@ -397,12 +482,19 @@ def get_settings():
     with SessionLocal() as db:
         settings = db.query(SystemSettings).first()
         if settings: return settings.to_dict()
-        return {"sender_email": "admin@axian.com", "trigger_time": "17:00", "smtp_password": "", "smtp_host": "smtp.gmail.com", "smtp_port": 587}
+        return {
+            "sender_email": "admin@axian.com", 
+            "trigger_time": "17:00", 
+            "smtp_password": "", 
+            "smtp_host": "smtp.gmail.com", 
+            "smtp_port": 587,
+            "schedule_days_before_end": 5,
+            "schedule_reminder_days": 2
+        }
 
 @app.post("/api/settings")
 def update_settings(payload: SettingsPayload):
     env_path = ".env"
-    # Ensure .env file exists
     if not os.path.exists(env_path):
         open(env_path, "w").close()
 
@@ -411,36 +503,62 @@ def update_settings(payload: SettingsPayload):
         new_password = None
         if settings:
             settings.sender_email = payload.sender_email
-            settings.trigger_time = payload.trigger_time
+            if payload.trigger_time:
+                settings.trigger_time = payload.trigger_time
             if payload.smtp_password and payload.smtp_password != "********":
                 settings.smtp_password = payload.smtp_password
                 new_password = payload.smtp_password
             else:
-                new_password = settings.smtp_password  # keep existing
+                new_password = settings.smtp_password
             settings.smtp_host = payload.smtp_host
             settings.smtp_port = payload.smtp_port
         else:
             new_password = payload.smtp_password if payload.smtp_password != "********" else None
             settings = SystemSettings(
                 sender_email=payload.sender_email,
-                trigger_time=payload.trigger_time,
+                trigger_time=payload.trigger_time or "17:00",
                 smtp_password=new_password,
                 smtp_host=payload.smtp_host,
                 smtp_port=payload.smtp_port,
             )
             db.add(settings)
         db.commit()
-        update_scheduler_trigger(payload.trigger_time)
 
-        # ── Persist to .env so settings survive DB resets ──────────────────
         set_key(env_path, "SMTP_SENDER_EMAIL", payload.sender_email)
         set_key(env_path, "SMTP_HOST", payload.smtp_host)
         set_key(env_path, "SMTP_PORT", str(payload.smtp_port))
-        set_key(env_path, "SMTP_TRIGGER_TIME", payload.trigger_time)
         if new_password:
             set_key(env_path, "SMTP_PASSWORD", new_password)
-        logger.info(f"[Settings] Saved to DB and .env — sender: {payload.sender_email}")
 
+        return {"status": "success", "settings": settings.to_dict()}
+
+@app.post("/api/scheduler")
+def update_scheduler(payload: SchedulerPayload):
+    env_path = ".env"
+    if not os.path.exists(env_path):
+        open(env_path, "w").close()
+
+    with SessionLocal() as db:
+        settings = db.query(SystemSettings).first()
+        if settings:
+            settings.trigger_time = payload.trigger_time
+            settings.schedule_days_before_end = payload.schedule_days_before_end
+            settings.reminders_json = payload.reminders_json
+            settings.active_schedule_id = payload.active_schedule_id
+            settings.schedules_json = payload.schedules_json
+        else:
+            settings = SystemSettings(
+                trigger_time=payload.trigger_time,
+                schedule_days_before_end=payload.schedule_days_before_end,
+                reminders_json=payload.reminders_json,
+                active_schedule_id=payload.active_schedule_id,
+                schedules_json=payload.schedules_json
+            )
+            db.add(settings)
+        db.commit()
+        update_scheduler_trigger(payload.trigger_time)
+
+        set_key(env_path, "SMTP_TRIGGER_TIME", payload.trigger_time)
         return {"status": "success", "settings": settings.to_dict()}
 
 @app.post("/api/run_pipeline")
