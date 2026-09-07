@@ -14,6 +14,18 @@ from pydantic import BaseModel
 from typing import List, Optional
 import smtplib
 from email.mime.text import MIMEText
+import socket
+
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # Connect to a public IP to figure out our local IP routing
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "localhost"
 from email.mime.multipart import MIMEMultipart
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -335,7 +347,8 @@ def _send_emails(employee_codes, db_session, custom_subject=None, custom_body=No
         server = smtplib.SMTP(host, port)
         server.starttls()
         server.login(sender, pwd)
-        public_url = os.environ.get("PUBLIC_URL", "http://localhost:8000")
+        local_ip = get_local_ip()
+        public_url = os.environ.get("PUBLIC_URL") or f"http://{local_ip}:8000"
         for code in employee_codes:
             emp = code_to_emp.get(code)
             if not emp or not emp.get("email"): continue
