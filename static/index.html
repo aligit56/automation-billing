@@ -9,40 +9,72 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --brand:#1a237e;--brand-light:#3949ab;--brand-pale:#e8eaf6;
-  --success:#2e7d32;--success-bg:#e8f5e9;--success-border:#a5d6a7;
-  --warning:#f57c00;--warning-bg:#fff3e0;--warning-border:#ffcc80;
-  --danger:#c62828;--danger-bg:#ffebee;--danger-border:#ef9a9a;
-  --info:#0277bd;--info-bg:#e1f5fe;--info-border:#81d4fa;
-  --purple:#6a1b9a;--purple-bg:#f3e5f5;--purple-border:#ce93d8;
-  --neutral:#546e7a;--neutral-bg:#eceff1;--neutral-border:#b0bec5;
-  --surface:#ffffff;--bg:#f0f4f8;--border:#e2e8f0;
-  --text:#1e293b;--text-muted:#64748b;--text-faint:#94a3b8;
-  --radius:10px;--radius-sm:6px;--shadow:0 2px 12px rgba(0,0,0,.07);--shadow-md:0 4px 20px rgba(0,0,0,.1);
+  --brand:#c92a48;--brand-light:#e94a68;--brand-pale:#ffebee;
+  --success:#10b981;--success-bg:#ecfdf5;--success-border:#6ee7b7;
+  --warning:#f59e0b;--warning-bg:#fffbeb;--warning-border:#fcd34d;
+  --danger:#ef4444;--danger-bg:#fef2f2;--danger-border:#fca5a5;
+  --info:#3b82f6;--info-bg:#eff6ff;--info-border:#93c5fd;
+  --purple:#8b5cf6;--purple-bg:#f5f3ff;--purple-border:#c4b5fd;
+  --neutral:#64748b;--neutral-bg:#f8fafc;--neutral-border:#cbd5e1;
+  --surface:#ffffff;--bg:#f1f5f9;--border:#e2e8f0;
+  --text:#0f172a;--text-muted:#475569;--text-faint:#94a3b8;
+  --radius:12px;--radius-sm:8px;
+  --shadow:0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.025);
+  --shadow-md:0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+  --shadow-lg:0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.05);
+  --font-family:'Inter', sans-serif;
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+[data-theme="dark"] {
+  --surface:#1e293b;--bg:#0f172a;--border:#334155;
+  --text:#f8fafc;--text-muted:#cbd5e1;--text-faint:#64748b;
+  --success-bg:rgba(16,185,129,0.15);--success-border:rgba(16,185,129,0.3);
+  --warning-bg:rgba(245,158,11,0.15);--warning-border:rgba(245,158,11,0.3);
+  --danger-bg:rgba(239,68,68,0.15);--danger-border:rgba(239,68,68,0.3);
+  --info-bg:rgba(59,130,246,0.15);--info-border:rgba(59,130,246,0.3);
+  --purple-bg:rgba(139,92,246,0.15);--purple-border:rgba(139,92,246,0.3);
+  --neutral-bg:rgba(100,116,139,0.15);--neutral-border:rgba(100,116,139,0.3);
+  --brand-pale:rgba(201,42,72,0.15);
+}
+
+[data-glass="true"] {
+  --surface:rgba(255,255,255,0.7);
+}
+[data-theme="dark"][data-glass="true"] {
+  --surface:rgba(30,41,59,0.7);
+}
+[data-glass="true"] .sidebar, [data-glass="true"] .topbar, [data-glass="true"] .stat-card, [data-glass="true"] .toolbar, [data-glass="true"] .right-panel, [data-glass="true"] .settings-section {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+body{font-family:var(--font-family);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;transition:background 0.3s, color 0.3s}
 .mso{font-family:'Material Symbols Outlined';font-size:18px;line-height:1;vertical-align:middle;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
 
 /* ── Topbar ── */
-.topbar{background:var(--brand);color:#fff;height:56px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.topbar-logo{font-size:15px;font-weight:700;letter-spacing:.5px}
-.topbar-sub{font-size:12px;opacity:.7;margin-top:1px}
+.topbar{background:var(--surface);color:var(--text);height:64px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border)}
+.topbar-logo{font-size:15px;font-weight:700;letter-spacing:.5px; display:flex; align-items:center}
+.topbar-sub{font-size:12px;color:var(--text-muted);margin-left:12px; border-left:1px solid var(--border); padding-left:12px}
 .topbar-spacer{flex:1}
-.topbar-refresh{background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:var(--radius-sm);padding:6px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
-.topbar-refresh:hover{background:rgba(255,255,255,.2)}
+.topbar-refresh{background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:var(--radius-sm);padding:6px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s; font-weight:500}
+.topbar-refresh:hover{background:var(--brand-pale); color:var(--brand); border-color:var(--brand)}
 
 /* ── Layout ── */
 .main{display:flex;flex:1}
 .sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;transition:width 0.3s cubic-bezier(0.4, 0, 0.2, 1);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;overflow-x:hidden;z-index:40}
 .sidebar-section{padding:16px 20px 8px;font-size:13px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);white-space:nowrap;overflow:hidden;max-height:50px}
-.sidebar-item{position:relative;display:flex;align-items:center;gap:14px;padding:16px 20px;font-size:15.5px;font-weight:500;color:#334155;cursor:pointer;transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);border-radius:0;border-left:4px solid transparent;white-space:nowrap;overflow:hidden}
-.sidebar-item .mso{font-size:22px; color:var(--text-muted); flex-shrink:0}
+.sidebar-item{position:relative;display:flex;align-items:center;gap:14px;padding:16px 20px;font-size:15.5px;font-weight:500;color:var(--text);cursor:pointer;transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);border-radius:0;border-left:4px solid transparent;white-space:nowrap;overflow:hidden}
+.sidebar-item .mso{font-size:22px; color:var(--text-muted); flex-shrink:0; transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)}
 .sidebar-item:hover{background:var(--brand-pale);color:var(--brand)}
-.sidebar-item:hover .mso{color:var(--brand)}
+.sidebar-item:hover .mso{color:var(--brand); transform:scale(1.15)}
+.sidebar-item:active{transform:scale(0.96)}
 .sidebar-item.active{background:var(--brand-pale);color:var(--brand);border-left-color:var(--brand);font-weight:600}
 .sidebar-item.active .mso{color:var(--brand)}
 .sidebar-item .item-label{white-space:nowrap;transition:opacity 0.2s}
 .nav-badge{background:var(--danger);color:#fff;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:12px;margin-left:auto;line-height:1.2;transition:all .2s;box-shadow:0 2px 4px rgba(220,38,38,0.3)}
+
+@keyframes spin { 100% { transform:rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
 
 /* Filter Dropdown */
 .sidebar-section-toggle{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 8px;font-size:13px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;white-space:nowrap;overflow:hidden;user-select:none}
@@ -85,8 +117,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 /* ── Toolbar ── */
 .toolbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .search-box{flex:1;min-width:180px;position:relative}
-.search-box input{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--bg);outline:none;transition:border .2s}
-.search-box input:focus{border-color:var(--brand);background:#fff}
+.search-box input{width:100%;padding:8px 12px 8px 36px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--bg);outline:none;transition:border .2s;color:var(--text)}
+.search-box input:focus{border-color:var(--brand);background:var(--surface)}
 .search-box .mso{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-faint);font-size:16px}
 .toolbar-sep{width:1px;height:28px;background:var(--border)}
 .selection-info{font-size:13px;color:var(--text-muted);white-space:nowrap}
@@ -94,9 +126,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 /* ── Buttons ── */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all .2s;white-space:nowrap}
 .btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-light)}
-.btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#1b5e20}
-.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#b71c1c}
-.btn-warning{background:var(--warning);color:#fff}.btn-warning:hover{background:#e65100}
+.btn-success{background:var(--success);color:#fff}.btn-success:hover{background:#10b981}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{background:#ef4444}
+.btn-warning{background:var(--warning);color:#fff}.btn-warning:hover{background:#f59e0b}
 .btn-outline{background:transparent;color:var(--text-muted);border:1px solid var(--border)}.btn-outline:hover{border-color:var(--brand);color:var(--brand);background:var(--brand-pale)}
 .btn-ghost{background:transparent;color:var(--text-muted);padding:6px 8px}.btn-ghost:hover{background:var(--bg)}
 .btn-sm{padding:5px 10px;font-size:12px}
@@ -105,13 +137,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 /* ── Table ── */
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
 .table-scroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:14.5px;transition:all 0.3s ease}
-thead th{padding:14px 18px;text-align:left;font-size:12px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.5px;background:#f8fafc;border-bottom:1px solid var(--border);white-space:nowrap;transition:all 0.3s ease}
-tbody tr{border-bottom:1px solid #f1f5f9;transition:background .15s}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+thead th{padding:14px 18px;text-align:left;font-size:12px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.5px;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
 tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:#f8fafc}
+tbody tr:hover{background:var(--bg)}
 tbody tr.selected{background:var(--brand-pale)}
-td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3s ease}
+td{padding:16px 18px;white-space:nowrap;vertical-align:middle}
 .td-check{width:46px}
 .td-actions{text-align:right}
 
@@ -165,8 +197,8 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
 .panel-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .panel-row{margin-bottom:12px}
 .panel-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.panel-input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;background:#fff;transition:border .2s}
-.panel-input:focus{border-color:var(--brand)}
+.panel-input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none;background:var(--bg);color:var(--text);transition:border .2s}
+.panel-input:focus{border-color:var(--brand);background:var(--surface)}
 .panel-btn-full{width:100%;padding:10px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .2s}
 .schedule-info{font-size:12px;color:var(--text-muted);text-align:center;margin-top:8px}
 
@@ -182,8 +214,8 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
 .settings-section-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px}
 .settings-field{margin-bottom:16px}
 .settings-field label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
-.settings-field input,.settings-field select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;background:#fff;transition:border .2s}
-.settings-field input:focus,.settings-field select:focus{border-color:var(--brand)}
+.settings-field input,.settings-field select,.settings-field textarea{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;background:var(--bg);color:var(--text);transition:border .2s}
+.settings-field input:focus,.settings-field select:focus,.settings-field textarea:focus{border-color:var(--brand);background:var(--surface)}
 .settings-row{display:grid;grid-template-columns:1fr 140px;gap:16px}
 .empty-state p{font-size:14px}
 
@@ -202,21 +234,36 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
 @media(max-width:900px){.sidebar{display:none}.side-panel{width:100%}.content-flex{flex-direction:column}}
 @media(max-width:600px){.stats-row{grid-template-columns:1fr}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
 <!-- Topbar -->
 <div class="topbar">
-  <button class="topbar-refresh" onclick="toggleSidebar()" style="margin-right:12px; padding:6px; background:transparent">
-    <span class="mso">menu</span>
+  <button class="topbar-refresh" onclick="toggleSidebar()" style="margin-right:8px; padding:6px; background:transparent; border:none; box-shadow:none; display:flex; align-items:center">
+    <span class="mso" style="font-size:24px; color:var(--text)">menu</span>
   </button>
-  <div>
-    <div class="topbar-logo">Axian Attendance</div>
-    <div class="topbar-sub">Admin Portal</div>
+  <div style="display:flex; align-items:center">
+    <div class="topbar-logo" style="margin-right:8px; display:flex; align-items:center"><img src="/static/logo.png" alt="AXIAN" style="height:26px; object-fit:contain; display:block"></div>
+    <div class="topbar-sub" style="font-size:11px; font-weight:700; color:var(--text); background:var(--border); padding:4px 10px; border-radius:12px; margin-left:4px; border:none; text-transform:uppercase; letter-spacing:0.5px">Admin Portal</div>
   </div>
   <div class="topbar-spacer"></div>
-  <button class="topbar-refresh" onclick="fetchEmployees()">
-    <span class="mso">refresh</span> Refresh Data
+  
+  <!-- Live Clock -->
+  <div id="liveClock" style="font-size:13px; font-weight:600; color:var(--text-muted); margin-right:16px; display:flex; align-items:center; gap:6px;">
+    <span class="mso" style="font-size:16px">schedule</span> <span id="clockText">Loading time...</span>
+  </div>
+
+  <!-- Summary Report Button -->
+  <button class="topbar-refresh" onclick="openSummaryModal()" style="margin-right:8px; border-color:var(--brand); color:var(--brand); background:var(--brand-pale);">
+    <span class="mso">assessment</span> Summary Report
+  </button>
+
+  <button class="topbar-refresh" onclick="fetchEmployees()" style="margin-right:8px">
+    <span class="mso" id="refreshIcon">refresh</span> Refresh Data
+  </button>
+  <button class="topbar-refresh" onclick="openThemeSettings()">
+    <span class="mso">palette</span> Theme
   </button>
 </div>
 
@@ -225,8 +272,6 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
   <div class="sidebar" id="appSidebar">
     <div class="sidebar-section">Navigation</div>
     <div class="sidebar-item active" onclick="navigateTo('dashboard')" title="Dashboard"><span class="mso">grid_view</span><span class="item-label">Dashboard</span></div>
-    <div class="sidebar-item" onclick="navigateTo('settings')" title="Settings"><span class="mso">settings</span><span class="item-label">Settings</span></div>
-    <div class="sidebar-item" onclick="navigateTo('scheduler')" title="Scheduler"><span class="mso">schedule</span><span class="item-label">Scheduler</span></div>
     
     <div class="sidebar-divider"></div>
     
@@ -258,6 +303,11 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
         <span id="badge-Expired" class="nav-badge" style="display:none">0</span>
       </div>
     </div>
+
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">System</div>
+    <div class="sidebar-item" onclick="navigateTo('scheduler')" title="Scheduler"><span class="mso">schedule</span><span class="item-label">Scheduler</span></div>
+    <div class="sidebar-item" onclick="navigateTo('settings')" title="Settings"><span class="mso">settings</span><span class="item-label">Settings</span></div>
   </div>
 
   <!-- Main content -->
@@ -267,7 +317,7 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
     <div id="dashboardPage">
     <div class="page-header">
       <div class="page-title">Attendance Dashboard</div>
-      <div class="page-sub">August 2026 &mdash; See who's been contacted, who replied, and who still needs attention</div>
+      <div class="page-sub" id="dashboardSubtitle">Loading period...</div>
     </div>
 
     <!-- Stat cards -->
@@ -309,8 +359,44 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
         <div style="font-size:10px;color:var(--text-faint);margin-top:3px">Correction not accepted</div>
       </div>
     </div>
+    
+    <!-- Attendance Progress Graph -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:30px; box-shadow:var(--shadow);">
+      <h3 style="margin:0 0 16px; font-size:16px; color:var(--text); display:flex; align-items:center; gap:8px;">
+        <span class="mso" style="color:var(--brand);">bar_chart</span> Overall Verification Progress
+      </h3>
+      
+      <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">
+        <span id="progTextLeft">Verified: 0%</span>
+        <span id="progTextRight">Unverified: 100%</span>
+      </div>
+      
+      <div style="height:12px; background:var(--bg); border-radius:6px; display:flex; overflow:hidden; border:1px solid var(--border);">
+        <div id="progBarSuccess" style="width:0%; background:var(--success); transition:width 0.5s ease;"></div>
+        <div id="progBarPending" style="width:0%; background:var(--info); transition:width 0.5s ease;"></div>
+        <div id="progBarDanger" style="width:0%; background:var(--danger); transition:width 0.5s ease;"></div>
+      </div>
+      
+      <div style="display:flex; gap:24px; margin-top:16px; font-size:12px; font-weight:600; color:var(--text-muted); flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:6px;"><div style="width:12px;height:12px;border-radius:3px;background:var(--success);"></div> Verified</div>
+        <div style="display:flex; align-items:center; gap:6px;"><div style="width:12px;height:12px;border-radius:3px;background:var(--info);"></div> Awaiting / Needs Action</div>
+        <div style="display:flex; align-items:center; gap:6px;"><div style="width:12px;height:12px;border-radius:3px;background:var(--danger);"></div> Rejected</div>
+        <div style="display:flex; align-items:center; gap:6px;"><div style="width:12px;height:12px;border-radius:3px;background:var(--bg);border:1px solid var(--border);"></div> Not Contacted</div>
+      </div>
     </div>
-
+    
+    <!-- Chart.js Professional Graphs -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:30px;">
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
+        <h3 style="margin:0 0 16px; font-size:16px; color:var(--text);">Attendance Status Distribution</h3>
+        <div style="height:250px;"><canvas id="statusPieChart"></canvas></div>
+      </div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
+        <h3 style="margin:0 0 16px; font-size:16px; color:var(--text);">Verification Pipeline</h3>
+        <div style="height:250px;"><canvas id="pipelineBarChart"></canvas></div>
+      </div>
+    </div>
+    </div> <!-- END dashboardPage -->
     <!-- ═══ Employees Page ═══ -->
     <div id="employeesPage" style="display:none">
       <div class="page-header">
@@ -411,7 +497,7 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
               </div>
             </div>
             <div style="font-weight:400;font-size:10px;color:var(--text-faint); margin-bottom:6px;">(The correction link button is always added automatically)</div>
-            <textarea id="emailBody" class="panel-input" rows="8" style="resize:vertical;font-size:13px;line-height:1.5; background-color:#f8fafc; border-color:var(--border);" readonly></textarea>
+            <textarea id="emailBody" class="panel-input" rows="8" style="resize:vertical;font-size:13px;line-height:1.5; background-color:var(--bg); border-color:var(--border);" readonly></textarea>
           </div>
         </div>
 
@@ -479,7 +565,7 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
 
     <!-- ═══ Scheduler Page ═══ -->
     <div id="schedulerPage" class="settings-page">
-      <div style="position:sticky; top:56px; z-index:20; background:var(--bg); padding-bottom:16px; padding-top:24px; margin-top:-24px; box-shadow:0 4px 6px -6px rgba(0,0,0,0.1);">
+      <div style="position:sticky; top:64px; z-index:20; background:var(--bg); padding-bottom:16px; padding-top:24px; margin-top:-24px;">
         <div class="page-header" style="margin-bottom:20px;">
           <div class="page-title">Scheduler</div>
           <div class="page-sub">Configure automated email scheduling and reminders for attendance verification</div>
@@ -496,20 +582,20 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
       <div style="display:grid; grid-template-columns: 1fr 350px; gap: 24px; align-items: start; margin-top:20px;">
         <div>
           <!-- Current Profile Details -->
-          <div class="settings-section" style="background:#fff;border-color:var(--brand-pale)">
+          <div class="settings-section" style="background:var(--surface);border-color:var(--brand-pale)">
             <div class="settings-row" style="grid-template-columns:1fr auto;align-items:center;margin-bottom:0">
               <div class="settings-field" style="margin:0">
                 <label>Schedule Name</label>
                 <input id="s_profile_name" type="text" onchange="updateProfileName(this.value)">
               </div>
               <div style="display:flex;gap:10px;margin-top:22px">
-                <button id="btn_activate" onclick="activateCurrentProfile()" class="btn btn-outline" style="border-color:var(--success);color:var(--success);background:#f6fcf7;font-weight:600">
+                <button id="btn_activate" onclick="activateCurrentProfile()" class="btn btn-outline" style="border-color:var(--success);color:var(--success);background:var(--success-bg);font-weight:600">
                   Set as Active
                 </button>
-                <button id="btn_deactivate" onclick="deactivateCurrentProfile()" class="btn btn-outline" style="border-color:var(--text-muted);color:var(--text-muted);background:#f8fafc;font-weight:600;display:none">
+                <button id="btn_deactivate" onclick="deactivateCurrentProfile()" class="btn btn-outline" style="border-color:var(--text-muted);color:var(--text-muted);background:var(--bg);font-weight:600;display:none">
                   Deactivate
                 </button>
-                <button id="btn_delete" onclick="deleteCurrentProfile()" class="btn btn-outline" style="border-color:var(--danger);color:var(--danger);background:#fef2f2;padding:6px 12px">
+                <button id="btn_delete" onclick="deleteCurrentProfile()" class="btn btn-outline" style="border-color:var(--danger);color:var(--danger);background:var(--danger-bg);padding:6px 12px">
                   <span class="mso">delete</span>
                 </button>
               </div>
@@ -533,14 +619,14 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
                 <input id="s_time" type="time" value="17:00">
               </div>
             </div>
-            <div class="settings-row" style="display:flex; align-items:center; gap:32px; margin-top:4px;">
-              <div class="settings-field" style="display:flex;flex-direction:row;align-items:center;gap:8px;padding-top:22px;margin:0;">
-                <input type="checkbox" id="s_is_recurring" checked style="width:16px;height:16px;margin:0;cursor:pointer" onchange="document.getElementById('s_target_month_container').style.opacity = this.checked ? '0.5' : '1'; document.getElementById('s_target_month').disabled = this.checked; renderCalendar();">
+            <div class="settings-row" style="display:flex; align-items:flex-end; gap:32px; margin-top:4px; margin-bottom:16px;">
+              <div class="settings-field" style="display:flex;flex-direction:row;align-items:center;gap:8px;margin:0;height:40px;">
+                <input type="checkbox" id="s_is_recurring" checked style="width:18px;height:18px;margin:0;cursor:pointer" onchange="document.getElementById('s_target_month_container').style.opacity = this.checked ? '0.5' : '1'; document.getElementById('s_target_month').disabled = this.checked; renderCalendar();">
                 <label for="s_is_recurring" style="margin:0;cursor:pointer;display:inline-block;text-transform:none;font-size:14px;letter-spacing:normal;color:var(--text);white-space:nowrap">Repeat every month</label>
               </div>
               <div class="settings-field" id="s_target_month_container" style="opacity:0.5; transition: opacity 0.2s; flex:1; max-width:250px; margin:0;">
                 <label>Target Month (if not repeating)</label>
-                <select id="s_target_month" disabled style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fff;outline:none" onchange="renderCalendar()">
+                <select id="s_target_month" disabled style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);outline:none" onchange="renderCalendar()">
                   <option value="1">January</option>
                   <option value="2">February</option>
                   <option value="3">March</option>
@@ -590,7 +676,7 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
         </div>
         
         <!-- Right Column: Calendar Preview -->
-        <div class="settings-section" style="background:#fff;position:sticky;top:180px;margin-bottom:0">
+        <div class="settings-section" style="background:var(--surface);position:sticky;top:180px;margin-bottom:0">
           <div class="settings-section-title"><span class="mso">calendar_month</span> Preview Calendar</div>
           <div class="settings-section-sub">Visual preview for the current month</div>
           
@@ -613,8 +699,8 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle;transition:all 0.3
   </div> <!-- end content -->
 </div> <!-- end main -->
 
-<div id="confirmDeleteModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.5);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(2px)">
-  <div style="background:#fff;border-radius:12px;width:100%;max-width:400px;box-shadow:0 10px 25px rgba(0,0,0,0.1);overflow:hidden">
+<div id="confirmDeleteModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:12px;width:100%;max-width:400px;box-shadow:0 10px 25px rgba(0,0,0,0.1);overflow:hidden">
     <div style="padding:24px;border-bottom:1px solid var(--border)">
       <h3 style="margin:0 0 8px;font-size:18px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px">
         <span class="mso" style="color:var(--danger)">warning</span> Delete Schedule
@@ -694,9 +780,9 @@ async function loadSettingsData() {
     _passAlreadySaved = !!s.smtp_password;
     const passSection = document.getElementById('passSection');
     if (_passAlreadySaved) {
-      passSection.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:10px 14px"><span style="font-size:13px;color:#2e7d32">&#x1F512; Password saved &mdash; &#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</span><button type="button" onclick="showPasswordInput()" style="font-size:12px;background:transparent;border:1px solid #2e7d32;color:#2e7d32;border-radius:4px;padding:4px 10px;cursor:pointer">Change</button></div><input id="s_pass" type="hidden" value="********">`;
+      passSection.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:10px 14px"><span style="font-size:13px;color:#2e7d32">&#x1F512; Password saved &#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</span><button type="button" onclick="showPasswordInput()" style="font-size:12px;background:transparent;border:1px solid #2e7d32;color:#2e7d32;border-radius:4px;padding:4px 10px;cursor:pointer">Change</button></div><input id="s_pass" type="hidden" value="********">`;
     } else {
-      passSection.innerHTML = `<input id="s_pass" type="password" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;background:#fff" placeholder="Enter 16-character app password">`;
+      passSection.innerHTML = `<input id="s_pass" type="password" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;background:var(--bg);color:var(--text)" placeholder="Enter 16-character app password">`;
     }
   } catch(e) { showToast('Failed to load settings', 'error'); }
 }
@@ -704,7 +790,7 @@ async function loadSettingsData() {
 function addReminderRow(days=2, time='09:00', body='') {
   const container = document.getElementById('remindersContainer');
   const div = document.createElement('div');
-  div.style.cssText = 'border:1px solid var(--border);border-radius:8px;padding:16px;background:#f8fafc;position:relative';
+  div.style.cssText = 'border:1px solid var(--border);border-radius:8px;padding:16px;background:var(--bg);position:relative';
   const hasCustomBody = body && body !== DEFAULT_EMAIL_BODY;
   const defaultBody = body || DEFAULT_EMAIL_BODY;
   
@@ -1006,7 +1092,7 @@ function renderCalendar() {
       if (bgColor) {
         style += `background-color:${bgColor};color:${color};`;
       } else {
-        style += `background-color:#f8fafc;color:var(--text);`;
+        style += `background-color:var(--brand-pale);color:var(--text);`;
       }
       
       gridHtml += `<div style="${style}">${d}</div>`;
@@ -1122,13 +1208,19 @@ async function saveScheduler(silent = false) {
 
 // ── Data Fetching ──────────────────────────────────────────────────────────
 async function fetchEmployees() {
+  const refreshIcon = document.getElementById('refreshIcon');
+  if (refreshIcon) refreshIcon.classList.add('spin');
   try {
-    const res = await fetch('/api/employees');
-    allData = await res.json();
+    const minWait = new Promise(resolve => setTimeout(resolve, 800)); // ensure it spins for at least 800ms
+    const fetchPromise = fetch('/api/employees').then(r => r.json());
+    const [_, data] = await Promise.all([minWait, fetchPromise]);
+    allData = data;
     updateCounts();
     applyFilters();
   } catch(e) {
     showToast('Failed to load data: ' + e.message, 'error');
+  } finally {
+    if (refreshIcon) refreshIcon.classList.remove('spin');
   }
 }
 
@@ -1173,6 +1265,96 @@ function updateCounts() {
       }
     }
   });
+  
+  // -- Update Progress Graph --
+  const total = allData.length || 1; // prevent div by zero
+  const verifiedCount = allData.filter(e => e.status === 'Approved').length;
+  const rejectedCount = allData.filter(e => e.status === 'Rejected').length;
+  const pendingCount = allData.filter(e => e.status === 'Email Sent' || e.status === 'Response Received').length;
+  
+  const noActionCount = allData.filter(e => e.status === 'No Action Taken').length;
+  const expiredCount = allData.filter(e => e.status === 'Expired').length;
+  
+  const pctVerified = (verifiedCount / total) * 100;
+  const pctPending = (pendingCount / total) * 100;
+  const pctRejected = (rejectedCount / total) * 100;
+  
+  const pbS = document.getElementById('progBarSuccess');
+  const pbP = document.getElementById('progBarPending');
+  const pbD = document.getElementById('progBarDanger');
+  const ptL = document.getElementById('progTextLeft');
+  const ptR = document.getElementById('progTextRight');
+  
+  if(pbS && pbP && pbD && ptL && ptR) {
+    pbS.style.width = pctVerified + '%';
+    pbP.style.width = pctPending + '%';
+    pbD.style.width = pctRejected + '%';
+    ptL.textContent = 'Verified: ' + Math.round(pctVerified) + '%';
+    ptR.textContent = 'Unverified / Action Needed: ' + Math.round(100 - pctVerified) + '%';
+  }
+  
+  // -- Update Chart.js Graphs --
+  const pieCtx = document.getElementById('statusPieChart');
+  const barCtx = document.getElementById('pipelineBarChart');
+  if(pieCtx && barCtx) {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const colors = {
+      verified: rootStyle.getPropertyValue('--success').trim() || '#10b981',
+      pending: rootStyle.getPropertyValue('--info').trim() || '#3b82f6',
+      rejected: rootStyle.getPropertyValue('--danger').trim() || '#ef4444',
+      noAction: rootStyle.getPropertyValue('--neutral').trim() || '#64748b',
+      expired: rootStyle.getPropertyValue('--warning').trim() || '#f59e0b',
+      text: rootStyle.getPropertyValue('--text').trim() || '#1e293b'
+    };
+    
+    if (window.statusPieChartInstance) {
+      window.statusPieChartInstance.data.datasets[0].data = [verifiedCount, pendingCount, rejectedCount, noActionCount, expiredCount];
+      window.statusPieChartInstance.update();
+    } else {
+      window.statusPieChartInstance = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Verified', 'Pending', 'Rejected', 'Not Contacted', 'Expired'],
+          datasets: [{
+            data: [verifiedCount, pendingCount, rejectedCount, noActionCount, expiredCount],
+            backgroundColor: [colors.verified, colors.pending, colors.rejected, colors.noAction, colors.expired],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'right', labels: { color: colors.text, font: {family: 'Inter'} } } },
+          cutout: '70%'
+        }
+      });
+    }
+    
+    if (window.pipelineBarChartInstance) {
+      window.pipelineBarChartInstance.data.datasets[0].data = [noActionCount, pendingCount, verifiedCount + rejectedCount];
+      window.pipelineBarChartInstance.update();
+    } else {
+      window.pipelineBarChartInstance = new Chart(barCtx, {
+        type: 'bar',
+        data: {
+          labels: ['Stage 1: Uncontacted', 'Stage 2: In Progress', 'Stage 3: Resolved'],
+          datasets: [{
+            label: 'Employees',
+            data: [noActionCount, pendingCount, verifiedCount + rejectedCount],
+            backgroundColor: colors.pending,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { color: colors.text, stepSize: 1 } },
+            x: { ticks: { color: colors.text } }
+          }
+        }
+      });
+    }
+  }
 }
 
 function filterByStatus(status) {
@@ -1190,6 +1372,18 @@ function filterByStatus(status) {
       el.classList.add('active');
     }
   });
+  
+  // Hide Email sidebar if not on 'All Employees'
+  const emailSidebar = document.getElementById('rightSidebarWrapper');
+  if (emailSidebar) {
+    if (status === '') {
+      emailSidebar.style.display = 'flex';
+    } else {
+      emailSidebar.style.display = 'none';
+      emailSidebar.classList.add('collapsed');
+    }
+    updateTableZoom();
+  }
 }
 
 function applyFilters() {
@@ -1253,7 +1447,7 @@ function fmtDate(iso) {
 function renderTable() {
   const tbody = document.getElementById('tableBody');
   if (filteredData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span class="mso">search_off</span><p>No employees match the current filter.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><span class="mso">search_off</span><p>Currently no employees</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = filteredData.map(emp => {
@@ -1443,7 +1637,7 @@ function editEmailMode() {
 function saveEmailMode() {
   const ta = document.getElementById('emailBody');
   ta.setAttribute('readonly', 'true');
-  ta.style.backgroundColor = '#f8fafc';
+  ta.style.backgroundColor = 'var(--bg)';
   ta.style.borderColor = 'var(--border)';
   document.getElementById('btnSaveBody').style.display = 'none';
   document.getElementById('btnEditBody').style.display = 'inline-flex';
@@ -1480,7 +1674,7 @@ setInterval(fetchEmployees, 8000);
 <script>
 let _passAlreadySaved = false;
 function showPasswordInput() {
-  document.getElementById('passSection').innerHTML = `<input id="s_pass" type="password" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;background:#fff" placeholder="Enter new 16-character app password" autofocus>`;
+  document.getElementById('passSection').innerHTML = `<input id="s_pass" type="password" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;background:var(--bg);color:var(--text)" placeholder="Enter new 16-character app password" autofocus>`;
   document.getElementById('s_pass').focus();
 }
 async function saveSettings() {
@@ -1495,6 +1689,269 @@ async function saveSettings() {
   if (data.status === 'success') { showToast('Settings saved successfully!', 'success'); }
   else showToast('Error saving settings: ' + (data.message||''), 'error');
 }
+
+// ── Clock & Dynamic Subtitle ──
+function setupDateAndSubtitle() {
+  const clockEl = document.getElementById('clockText');
+  const subEl = document.getElementById('dashboardSubtitle');
+  const now = new Date();
+  
+  if(clockEl) {
+    clockEl.textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric', year: 'numeric' });
+  }
+  if(subEl) {
+    const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    subEl.textContent = `${monthYear} — See who's been contacted, who replied, and who still needs attention`;
+  }
+}
+document.addEventListener('DOMContentLoaded', setupDateAndSubtitle);
+
+// ── Summary Modal ──
+function openSummaryModal() {
+  const m = document.getElementById('summaryModal');
+  const content = document.getElementById('summaryContent');
+  
+  const total = allData.length;
+  
+  const verifiedList = allData.filter(e => e.status === 'Approved');
+  const rejectedList = allData.filter(e => e.status === 'Rejected');
+  const noActionList = allData.filter(e => e.status === 'No Action Taken');
+  const pendingList = allData.filter(e => e.status === 'Email Sent' || e.status === 'Response Received');
+  const expiredList = allData.filter(e => e.status === 'Expired');
+  
+  const verified = verifiedList.length;
+  const rejected = rejectedList.length;
+  const noAction = noActionList.length;
+  const pending = pendingList.length;
+  const expired = expiredList.length;
+  
+  const formatNames = (arr) => {
+    if(arr.length === 0) return '';
+    if(arr.length <= 3) return ` (${arr.map(a => a.name).join(', ')})`;
+    return ` (${arr.slice(0,3).map(a => a.name).join(', ')} and ${arr.length - 3} others)`;
+  };
+  
+  const now = new Date();
+  const month = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  
+  content.innerHTML = `
+    <div style="background:var(--bg);padding:24px;border-radius:8px;margin-bottom:24px;text-align:center;">
+      <h3 style="margin:0 0 8px;font-size:20px;color:var(--brand);">Period: ${month}</h3>
+      <p style="margin:0;color:var(--text-muted);">Overall verification progress for all imported employees.</p>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:24px;margin-bottom:24px;">
+      <div style="border:1px solid var(--border);border-radius:8px;padding:20px;background:var(--surface);">
+        <div style="font-size:12px;text-transform:uppercase;color:var(--text-faint);font-weight:700;">Total Headcount</div>
+        <div style="font-size:36px;font-weight:800;color:var(--text);margin-top:8px;">${total}</div>
+      </div>
+      <div style="border:1px solid var(--border);border-radius:8px;padding:20px;background:var(--success-bg);">
+        <div style="font-size:12px;text-transform:uppercase;color:var(--text-faint);font-weight:700;">Successfully Verified</div>
+        <div style="font-size:36px;font-weight:800;color:var(--success);margin-top:8px;">${verified}</div>
+      </div>
+    </div>
+    
+    <div style="background:var(--brand-pale); border-left:4px solid var(--brand); padding:16px; border-radius:4px; margin-bottom:24px;">
+      <h4 style="margin:0 0 8px;font-size:15px;color:var(--brand);">Executive Summary</h4>
+      <p style="margin:0;font-size:14px;color:var(--text);line-height:1.6;">
+        Currently, out of <strong>${total}</strong> total employees recorded in the system, <strong>${verified}</strong> have successfully verified their attendance${formatNames(verifiedList)}. 
+        There are <strong>${pending}</strong> employees who have been contacted and are awaiting a reply${formatNames(pendingList)}. 
+        Action is required for <strong>${rejected}</strong> rejected forms${formatNames(rejectedList)}, and <strong>${noAction}</strong> employees have not been contacted yet${formatNames(noActionList)}.
+      </p>
+    </div>
+    
+    <h4 style="margin:0 0 16px;font-size:16px;">Action Breakdown</h4>
+    <ul style="list-style:none;padding:0;margin:0;">
+      <li style="display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border);">
+        <span><span class="mso" style="color:var(--neutral);vertical-align:bottom;margin-right:8px;font-size:18px;">radio_button_unchecked</span> Not Contacted</span>
+        <strong style="font-size:16px;">${noAction}</strong>
+      </li>
+      <li style="display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border);">
+        <span><span class="mso" style="color:var(--info);vertical-align:bottom;margin-right:8px;font-size:18px;">mail</span> Awaiting Reply</span>
+        <strong style="font-size:16px;">${pending}</strong>
+      </li>
+      <li style="display:flex;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border);">
+        <span><span class="mso" style="color:var(--danger);vertical-align:bottom;margin-right:8px;font-size:18px;">cancel</span> Rejected (Needs correction)</span>
+        <strong style="font-size:16px;">${rejected}</strong>
+      </li>
+      <li style="display:flex;justify-content:space-between;padding:12px;">
+        <span><span class="mso" style="color:var(--warning);vertical-align:bottom;margin-right:8px;font-size:18px;">timer_off</span> Link Expired</span>
+        <strong style="font-size:16px;">${expired}</strong>
+      </li>
+    </ul>
+  `;
+  
+  m.style.display = 'flex';
+  setTimeout(() => {
+    m.style.opacity = '1';
+    m.querySelector('.modal-content').style.transform = 'scale(1)';
+  }, 10);
+}
+
+function closeSummaryModal(force=false) {
+  if (force === true || force.target?.id === 'summaryModal') {
+    const m = document.getElementById('summaryModal');
+    m.style.opacity = '0';
+    m.querySelector('.modal-content').style.transform = 'scale(0.95)';
+    setTimeout(() => m.style.display = 'none', 200);
+  }
+}
+</script>
+<!-- Summary Modal -->
+<div class="modal-overlay" id="summaryModal" onclick="closeSummaryModal(event)" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:300;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;">
+  <div class="modal-content" style="background:var(--surface);width:90%;max-width:600px;max-height:85vh;border-radius:12px;padding:32px;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;border:1px solid var(--border);transform:scale(0.95);transition:transform 0.2s;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px;">
+      <h2 style="margin:0;font-size:22px;color:var(--text);display:flex;align-items:center;gap:12px;">
+        <span class="mso" style="font-size:28px;color:var(--brand);">assessment</span> Attendance Summary
+      </h2>
+      <button onclick="closeSummaryModal(true)" style="background:none;border:none;cursor:pointer;color:var(--text-muted);"><span class="mso" style="font-size:24px;">close</span></button>
+    </div>
+    
+    <div id="summaryContent" style="flex:1;overflow-y:auto;font-size:15px;line-height:1.6;color:var(--text);">
+      <!-- Dynamic content injected here -->
+    </div>
+    
+    <div style="margin-top:24px;border-top:1px solid var(--border);padding-top:16px;display:flex;justify-content:flex-end;">
+      <button class="btn btn-primary" onclick="closeSummaryModal(true)" style="font-size:14px;padding:10px 20px;">Close Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- Theme Settings Modal -->
+<div class="modal-overlay" id="themeModal" onclick="closeThemeSettings(event)" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s">
+  <div class="modal-content" style="background:var(--surface);width:400px;border-radius:var(--radius);padding:24px;box-shadow:var(--shadow-md);transform:scale(0.95);transition:all 0.2s; border:1px solid var(--border)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h3 style="margin:0;font-size:18px"><span class="mso" style="font-size:20px;vertical-align:text-bottom;color:var(--brand)">palette</span> Theme Customization</h3>
+      <button onclick="closeThemeSettings(true)" style="background:none;border:none;cursor:pointer;color:var(--text-muted)"><span class="mso">close</span></button>
+    </div>
+    
+    <div class="settings-field" style="display:flex; align-items:center; justify-content:space-between;">
+      <label style="margin:0; font-size:13px; font-weight:700; color:var(--text); letter-spacing:0.5px;">DARK MODE</label>
+      <input type="checkbox" id="themeDark" onchange="applyTheme()" style="width:24px; height:24px; cursor:pointer; accent-color:var(--brand); margin:0;">
+    </div>
+    <div class="settings-field" style="display:flex; align-items:center; justify-content:space-between;">
+      <label style="margin:0; font-size:13px; font-weight:700; color:var(--text); letter-spacing:0.5px;">GLASSMORPHISM (BLUR EFFECT)</label>
+      <input type="checkbox" id="themeGlass" onchange="applyTheme()" style="width:24px; height:24px; cursor:pointer; accent-color:var(--brand); margin:0;">
+    </div>
+    
+    <div class="settings-field">
+      <label>Brand Theme Color</label>
+      <div style="display:flex; gap:12px; margin-top:8px">
+        <button class="theme-swatch" style="background:#c92a48" onclick="setThemeColor('#c92a48')"></button>
+        <button class="theme-swatch" style="background:#3949ab" onclick="setThemeColor('#3949ab')"></button>
+        <button class="theme-swatch" style="background:#10b981" onclick="setThemeColor('#10b981')"></button>
+        <button class="theme-swatch" style="background:#f59e0b" onclick="setThemeColor('#f59e0b')"></button>
+        <button class="theme-swatch" style="background:#8b5cf6" onclick="setThemeColor('#8b5cf6')"></button>
+        <button class="theme-swatch" style="background:#0ea5e9" onclick="setThemeColor('#0ea5e9')"></button>
+        <button class="theme-swatch" style="background:#334155" onclick="setThemeColor('#334155')"></button>
+      </div>
+      <style>
+        .theme-swatch { width:32px; height:32px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s; }
+        .theme-swatch:hover { transform:scale(1.1); box-shadow:0 2px 8px rgba(0,0,0,0.2); }
+      </style>
+    </div>
+    
+    <div class="settings-field">
+      <label>Font Family</label>
+      <select id="themeFont" onchange="applyTheme()" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);outline:none">
+        <option value="'Inter', sans-serif">Inter (Default)</option>
+        <option value="'Roboto', sans-serif">Roboto</option>
+        <option value="'Poppins', sans-serif">Poppins</option>
+        <option value="'Courier New', monospace">Monospace</option>
+        <option value="'Georgia', serif">Serif</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+// Theme Management
+function openThemeSettings() {
+  const m = document.getElementById('themeModal');
+  m.style.display = 'flex';
+  setTimeout(() => { m.style.opacity = '1'; m.children[0].style.transform = 'scale(1)'; }, 10);
+  
+  // Load current
+  const stored = JSON.parse(localStorage.getItem('axianTheme') || '{}');
+  document.getElementById('themeDark').checked = stored.dark === true;
+  document.getElementById('themeGlass').checked = stored.glass === true;
+  currentThemeColor = stored.color || '#c92a48';
+  document.getElementById('themeFont').value = stored.font || "'Inter', sans-serif";
+}
+
+function closeThemeSettings(force=false) {
+  if (force === true || force.target?.id === 'themeModal') {
+    const m = document.getElementById('themeModal');
+    m.style.opacity = '0';
+    m.children[0].style.transform = 'scale(0.95)';
+    setTimeout(() => m.style.display = 'none', 200);
+  }
+}
+
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+}
+
+function adjustColor(hex, percent) {
+    let r = parseInt(hex.substring(1,3), 16);
+    let g = parseInt(hex.substring(3,5), 16);
+    let b = parseInt(hex.substring(5,7), 16);
+    r = parseInt(r * (100 + percent) / 100);
+    g = parseInt(g * (100 + percent) / 100);
+    b = parseInt(b * (100 + percent) / 100);
+    r = (r<255)?r:255; g = (g<255)?g:255; b = (b<255)?b:255;
+    r = Math.round(r).toString(16); g = Math.round(g).toString(16); b = Math.round(b).toString(16);
+    return "#" + (r.length==1?"0"+r:r) + (g.length==1?"0"+g:g) + (b.length==1?"0"+b:b);
+}
+
+let currentThemeColor = '#c92a48';
+
+function setThemeColor(hex) {
+  currentThemeColor = hex;
+  applyTheme();
+}
+
+function applyTheme() {
+  const dark = document.getElementById('themeDark')?.checked;
+  const glass = document.getElementById('themeGlass')?.checked;
+  const color = currentThemeColor;
+  const font = document.getElementById('themeFont')?.value || "'Inter', sans-serif";
+  
+  if (dark) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  
+  if (glass) document.documentElement.setAttribute('data-glass', 'true');
+  else document.documentElement.removeAttribute('data-glass');
+  
+  const root = document.documentElement;
+  root.style.setProperty('--brand', color);
+  root.style.setProperty('--brand-light', adjustColor(color, 20));
+  root.style.setProperty('--font-family', font);
+  
+  // Custom pale transparent color based on brand
+  const rgb = hexToRgb(color);
+  if (rgb) {
+     root.style.setProperty('--brand-pale', `rgba(${rgb}, 0.15)`);
+  }
+  
+  localStorage.setItem('axianTheme', JSON.stringify({dark, glass, color, font}));
+}
+
+// Init theme on load
+(function() {
+  const stored = JSON.parse(localStorage.getItem('axianTheme') || '{}');
+  if (stored.dark) document.documentElement.setAttribute('data-theme', 'dark');
+  if (stored.glass) document.documentElement.setAttribute('data-glass', 'true');
+  if (stored.color) {
+      currentThemeColor = stored.color;
+      document.documentElement.style.setProperty('--brand', stored.color);
+      document.documentElement.style.setProperty('--brand-light', adjustColor(stored.color, 20));
+      const rgb = hexToRgb(stored.color);
+      if (rgb) document.documentElement.style.setProperty('--brand-pale', `rgba(${rgb}, 0.15)`);
+  }
+  if (stored.font) document.documentElement.style.setProperty('--font-family', stored.font);
+})();
 </script>
 </body>
 </html>
