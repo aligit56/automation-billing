@@ -139,7 +139,7 @@ body{font-family:var(--font-family);background:var(--bg);color:var(--text);min-h
 .table-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:14.5px}
 thead th{padding:14px 18px;text-align:left;font-size:12px;font-weight:600;color:var(--text-faint);text-transform:uppercase;letter-spacing:.5px;background:var(--bg);border-bottom:1px solid var(--border);white-space:nowrap}
-tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr{border-bottom:1px solid var(--border)}
 tbody tr:last-child{border-bottom:none}
 tbody tr:hover{background:var(--bg)}
 tbody tr.selected{background:var(--brand-pale)}
@@ -410,7 +410,7 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle}
         <div class="toolbar">
           <div class="search-box">
             <span class="mso">search</span>
-            <input type="text" id="searchInput" placeholder="Search name, code or email..." oninput="applyFilters()">
+            <input type="text" id="searchInput" placeholder="Search name, code or email..." oninput="debouncedSearch()">
           </div>
           <div class="toolbar-sep"></div>
           <span class="selection-info" id="selectionInfo">0 selected</span>
@@ -1309,7 +1309,7 @@ function updateCounts() {
     
     if (window.statusPieChartInstance) {
       window.statusPieChartInstance.data.datasets[0].data = [verifiedCount, pendingCount, rejectedCount, noActionCount, expiredCount];
-      window.statusPieChartInstance.update();
+      window.statusPieChartInstance.update('none');
     } else {
       window.statusPieChartInstance = new Chart(pieCtx, {
         type: 'doughnut',
@@ -1324,14 +1324,15 @@ function updateCounts() {
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: { legend: { position: 'right', labels: { color: colors.text, font: {family: 'Inter'} } } },
-          cutout: '70%'
+          cutout: '70%',
+          animation: false
         }
       });
     }
     
     if (window.pipelineBarChartInstance) {
       window.pipelineBarChartInstance.data.datasets[0].data = [noActionCount, pendingCount, verifiedCount + rejectedCount];
-      window.pipelineBarChartInstance.update();
+      window.pipelineBarChartInstance.update('none');
     } else {
       window.pipelineBarChartInstance = new Chart(barCtx, {
         type: 'bar',
@@ -1347,6 +1348,7 @@ function updateCounts() {
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: { legend: { display: false } },
+          animation: false,
           scales: {
             y: { beginAtZero: true, ticks: { color: colors.text, stepSize: 1 } },
             x: { ticks: { color: colors.text } }
@@ -1384,6 +1386,12 @@ function filterByStatus(status) {
     }
     updateTableZoom();
   }
+}
+
+let searchTimeout = null;
+function debouncedSearch() {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(applyFilters, 150);
 }
 
 function applyFilters() {
@@ -1701,7 +1709,7 @@ function setupDateAndSubtitle() {
   }
   if(subEl) {
     const monthYear = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    subEl.textContent = `${monthYear} — See who's been contacted, who replied, and who still needs attention`;
+    subEl.textContent = `${monthYear} See who's been contacted, who replied, and who still needs attention`;
   }
 }
 document.addEventListener('DOMContentLoaded', setupDateAndSubtitle);
