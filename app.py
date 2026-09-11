@@ -216,7 +216,11 @@ def get_employees_api():
     if not os.path.exists(filepath):
         from generate_dummy_excel import generate_excel
         generate_excel(filepath)
-    raw_data = parse_excel(filepath)
+    try:
+        raw_data = parse_excel(filepath)
+    except PermissionError:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="The Excel file is currently open in Microsoft Excel. Please close it and refresh the page.")
     formatted_data = []
     with SessionLocal() as db:
         for i, row in enumerate(raw_data):
@@ -340,7 +344,10 @@ def _send_emails(employee_codes, db_session, custom_subject=None, custom_body=No
     host = settings.smtp_host
     port = settings.smtp_port
     pwd = settings.smtp_password
-    employees_data = parse_excel("dummy_attendance_records.xlsx")
+    try:
+        employees_data = parse_excel("dummy_attendance_records.xlsx")
+    except PermissionError:
+        return {"status": "error", "message": "The Excel file is currently open in Microsoft Excel. Please close Excel before sending emails."}
     code_to_emp = {e["employee_code"]: e for e in employees_data}
     sent_count = 0
     try:
@@ -370,16 +377,20 @@ def _send_emails(employee_codes, db_session, custom_subject=None, custom_body=No
             msg['From'] = sender
             msg['To'] = emp_email
 
-            # Build email body — use custom body if provided, else default template
+            # Plain text fallback to significantly reduce Spam score
+            text_body = f"Hello {emp_name},\n\nPlease review your attendance records.\nClick here to review: {correction_link}\n\nAutomated message from Axian Admin Panel."
+            part1 = MIMEText(text_body, 'plain')
+            msg.attach(part1)
+
+            # Build email body HTML
             if custom_body:
-                # Wrap custom body in branded template, inject the correction link button
                 custom_body_html = custom_body.replace("\n", "<br>")
                 html = f"""<html><head><style>body{{font-family:'Segoe UI',Arial,sans-serif;color:#333;line-height:1.6;background:#f0f4f8;padding:20px;margin:0}}.wrapper{{max-width:620px;margin:0 auto}}.header{{background:#1a237e;color:#fff;padding:24px 30px;border-radius:8px 8px 0 0}}.header h1{{margin:0;font-size:20px;font-weight:600}}.body{{background:#fff;padding:30px;border:1px solid #e0e0e0;border-top:none}}.cta{{text-align:center;margin:28px 0 10px}}.cta a{{display:inline-block;background:#1a237e;color:#fff!important;text-decoration:none;padding:14px 36px;border-radius:6px;font-weight:600;font-size:15px}}.expiry{{text-align:center;font-size:12px;color:#999;margin-top:8px}}.footer{{background:#f5f5f5;padding:16px 30px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;text-align:center}}</style></head><body><div class="wrapper"><div class="header"><h1>Axian Attendance Verification</h1></div><div class="body"><p>Hello <strong>{emp_name}</strong>,</p><p>{custom_body_html}</p><div class="cta"><a href="{correction_link}">Review &amp; Submit Correction</a></div><div class="expiry">This link is unique to you and expires in 7 days. Do not share it.</div></div><div class="footer">Automated message from Axian Admin Panel. Do not reply.</div></div></body></html>"""
             else:
                 html = f"""<html><head><style>body{{font-family:'Segoe UI',Arial,sans-serif;color:#333;line-height:1.6;background:#f0f4f8;padding:20px;margin:0}}.wrapper{{max-width:620px;margin:0 auto}}.header{{background:#1a237e;color:#fff;padding:24px 30px;border-radius:8px 8px 0 0}}.header h1{{margin:0;font-size:20px;font-weight:600}}.header p{{margin:4px 0 0;font-size:13px;opacity:.8}}.body{{background:#fff;padding:30px;border:1px solid #e0e0e0;border-top:none}}.stat-grid{{display:flex;gap:12px;margin:20px 0}}.stat-box{{flex:1;text-align:center;padding:16px 10px;background:#f5f7ff;border-radius:8px;border:1px solid #e8eaf6}}.stat-num{{font-size:28px;font-weight:700;color:#1a237e;display:block}}.stat-label{{font-size:12px;color:#666;margin-top:4px}}.stat-box.warn .stat-num{{color:#c62828}}.stat-box.warn{{background:#fff5f5;border-color:#ffcdd2}}.cta{{text-align:center;margin:28px 0 10px}}.cta a{{display:inline-block;background:#1a237e;color:#fff!important;text-decoration:none;padding:14px 36px;border-radius:6px;font-weight:600;font-size:15px}}.expiry{{text-align:center;font-size:12px;color:#999;margin-top:8px}}.footer{{background:#f5f5f5;padding:16px 30px;border:1px solid #e0e0e0;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;text-align:center}}</style></head><body><div class="wrapper"><div class="header"><h1>Axian Attendance Verification</h1><p>Please review and confirm your attendance records for August 2026</p></div><div class="body"><p>Hello <strong>{emp_name}</strong>,</p><p>Your attendance data has been recorded. Please review and submit corrections if anything is incorrect.</p><div class="stat-grid"><div class="stat-box"><span class="stat-num">{days_worked}</span><div class="stat-label">Days Worked</div></div><div class="stat-box"><span class="stat-num">{approved_leaves}</span><div class="stat-label">Approved Leaves</div></div><div class="stat-box warn"><span class="stat-num">{unapproved_absences}</span><div class="stat-label">Unresolved Absences</div></div></div><div class="cta"><a href="{correction_link}">Review &amp; Submit Correction</a></div><div class="expiry">This link is unique to you and expires in 7 days. Do not share it.</div></div><div class="footer">Automated message from Axian Admin Panel. Do not reply.</div></div></body></html>"""
 
-            part = MIMEText(html, 'html')
-            msg.attach(part)
+            part2 = MIMEText(html, 'html')
+            msg.attach(part2)
             server.send_message(msg)
             logger.info(f"[EMAIL SENT] To: {emp_email} | Token: {new_token}")
             sent_count += 1
