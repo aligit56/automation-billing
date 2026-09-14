@@ -248,7 +248,7 @@ td{padding:16px 18px;white-space:nowrap;vertical-align:middle}
     <span class="mso" style="font-size:24px; color:var(--text)">menu</span>
   </button>
   <div style="display:flex; align-items:center">
-    <div class="topbar-logo" style="margin-right:8px; display:flex; align-items:center;"><img src="/static/logo.png" alt="AXIAN" style="height:26px; object-fit:contain; display:block; margin-top:2px;"><span style="font-size:16px; margin:0 16px; color:var(--text-muted); font-weight:300; opacity:0.6; font-family:'Inter', sans-serif; padding-top:2px;">✕</span><span style="font-size:26px; font-weight:900; letter-spacing:0px; font-family:'Inter', sans-serif; background:linear-gradient(172deg, #E51745 0%, #E51745 62%, transparent 62%, transparent 68%, #E51745 68%, #E51745 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1; padding-top:2px;">DPL</span></div>
+    <div class="topbar-logo" style="margin-right:8px; display:flex; align-items:center;"><img src="/static/logo.png" alt="AXIAN" style="height:26px; object-fit:contain; display:block; margin-top:2px;"><span style="font-size:18px; margin:0 16px; color:var(--text); font-weight:900; font-family:'Inter', sans-serif; padding-top:2px;">✕</span><span style="font-size:26px; font-weight:900; letter-spacing:0px; font-family:'Inter', sans-serif; background:linear-gradient(172deg, #DE1A36 0%, #DE1A36 62%, transparent 62%, transparent 68%, #DE1A36 68%, #DE1A36 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1; padding-top:2px;">DPL</span></div>
     <div class="topbar-sub" style="font-size:11px; font-weight:700; color:var(--text); background:var(--border); padding:4px 10px; border-radius:12px; margin-left:4px; border:none; text-transform:uppercase; letter-spacing:0.5px">Admin Portal</div>
   </div>
   <div class="topbar-spacer"></div>
@@ -1308,11 +1308,13 @@ function updateCounts() {
       rejected: rootStyle.getPropertyValue('--danger').trim() || '#ef4444',
       noAction: rootStyle.getPropertyValue('--neutral').trim() || '#64748b',
       expired: rootStyle.getPropertyValue('--warning').trim() || '#f59e0b',
-      text: rootStyle.getPropertyValue('--text').trim() || '#1e293b'
+      text: rootStyle.getPropertyValue('--text').trim() || '#1e293b',
+      border: rootStyle.getPropertyValue('--border').trim() || '#e2e8f0'
     };
     
     if (window.statusPieChartInstance) {
       window.statusPieChartInstance.data.datasets[0].data = [verifiedCount, pendingCount, rejectedCount, noActionCount, expiredCount];
+      window.statusPieChartInstance.options.plugins.legend.labels.color = colors.text;
       window.statusPieChartInstance.update('none');
     } else {
       window.statusPieChartInstance = new Chart(pieCtx, {
@@ -1336,6 +1338,10 @@ function updateCounts() {
     
     if (window.pipelineBarChartInstance) {
       window.pipelineBarChartInstance.data.datasets[0].data = [noActionCount, pendingCount, verifiedCount + rejectedCount];
+      window.pipelineBarChartInstance.options.scales.x.ticks.color = colors.text;
+      window.pipelineBarChartInstance.options.scales.y.ticks.color = colors.text;
+      window.pipelineBarChartInstance.options.scales.x.grid.color = colors.border;
+      window.pipelineBarChartInstance.options.scales.y.grid.color = colors.border;
       window.pipelineBarChartInstance.update('none');
     } else {
       window.pipelineBarChartInstance = new Chart(barCtx, {
@@ -1354,8 +1360,8 @@ function updateCounts() {
           plugins: { legend: { display: false } },
           animation: false,
           scales: {
-            y: { beginAtZero: true, ticks: { color: colors.text, stepSize: 1 } },
-            x: { ticks: { color: colors.text } }
+            y: { beginAtZero: true, ticks: { color: colors.text, stepSize: 1 }, grid: { color: colors.border } },
+            x: { ticks: { color: colors.text }, grid: { color: colors.border } }
           }
         }
       });
@@ -1948,6 +1954,13 @@ function applyTheme() {
   }
   
   localStorage.setItem('axianTheme', JSON.stringify({dark, glass, color, font}));
+
+  // Force chart colors to update by re-running updateCounts after CSS is applied
+  setTimeout(() => {
+    if (typeof updateCounts === 'function' && window.allData) {
+      updateCounts();
+    }
+  }, 50);
 }
 
 // Init theme on load
