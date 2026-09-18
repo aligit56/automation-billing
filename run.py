@@ -28,7 +28,8 @@ def main():
         if os.path.exists("cf.log"):
             with open("cf.log", "r") as f:
                 content = f.read()
-                match = re.search(r'https://[a-zA-Z0-9-]+\.trycloudflare\.com', content)
+                # Negative lookahead to ensure we don't accidentally match cloudflare's internal API domains
+                match = re.search(r'https://(?!(?:api|update)\.trycloudflare\.com)[a-zA-Z0-9-]+\.trycloudflare\.com', content)
                 if match:
                     public_url = match.group(0)
                     break

@@ -8,43 +8,50 @@ def generate_excel(filepath="dummy_attendance_records.xlsx"):
     # Define the data
     data = [
         {
-            "period_key": "2026-08", "employee_code": "EMP-1001", "full_name": "Alice Smith", 
+            "period_key": "2026-08", "employee_code": "EMP-1001", "full_name": "Zain Ahmed", 
             "email": "workwithzain09@gmail.com", "location_code": "US-MAIN", "days_worked": 22.0, 
             "approved_leaves": 0.0, "unapproved_absences": 0.0, "status": "ACTIVE", 
             "verification_status": "Verified", "employee_notes": "",
             "corrected_days": 22.0, "corrected_leaves": 0.0, "corrected_absences": 0.0
         },
         {
-            "period_key": "2026-08", "employee_code": "EMP-1002", "full_name": "Bob Jones", 
+            "period_key": "2026-08", "employee_code": "EMP-1002", "full_name": "Muhammad Ali", 
             "email": "241896@students.au.edu.pk", "location_code": "US-MAIN", "days_worked": 20.0, 
             "approved_leaves": 2.0, "unapproved_absences": 0.0, "status": "ACTIVE", 
             "verification_status": "Correction Submitted", "employee_notes": "Sick leave approved",
             "corrected_days": 22.0, "corrected_leaves": 0.0, "corrected_absences": 0.0
         },
         {
-            "period_key": "2026-08", "employee_code": "EMP-1004", "full_name": "Diana Prince", 
+            "period_key": "2026-08", "employee_code": "EMP-1007", "full_name": "Javeria Malik", 
+            "email": "javeriamalik45@gmail.com", "location_code": "US-MAIN", "days_worked": 21.0, 
+            "approved_leaves": 0.0, "unapproved_absences": 1.0, "status": "ACTIVE", 
+            "verification_status": "Pending", "employee_notes": "",
+            "corrected_days": "", "corrected_leaves": "", "corrected_absences": ""
+        },
+        {
+            "period_key": "2026-08", "employee_code": "EMP-1004", "full_name": "Zain Khan 2", 
             "email": "zainkhantge2@gmail.com", "location_code": "US-MAIN", "days_worked": 18.0, 
             "approved_leaves": 0.0, "unapproved_absences": 0.0, "status": "ACTIVE", 
             "verification_status": "Awaiting Response", "employee_notes": "Missed some days",
             "corrected_days": "", "corrected_leaves": "", "corrected_absences": ""
         },
         {
-            "period_key": "2026-08", "employee_code": "EMP-1003", "full_name": "Charlie Brown", 
+            "period_key": "2026-08", "employee_code": "EMP-1003", "full_name": "Ali Ahmed", 
             "email": "beattlerokkie17679@gmail.com", "location_code": "US-MAIN", "days_worked": 19.0, 
             "approved_leaves": 0.0, "unapproved_absences": 3.0, "status": "ACTIVE", 
             "verification_status": "Pending", "employee_notes": "No call no show",
             "corrected_days": "", "corrected_leaves": "", "corrected_absences": ""
         },
         {
-            "period_key": "2026-08", "employee_code": "EMP-1005", "full_name": "Eve Adams", 
+            "period_key": "2026-08", "employee_code": "EMP-1005", "full_name": "Zain Ahmed 3", 
             "email": "workwithzain02@gmail.com", "location_code": "US-MAIN", "days_worked": 22.0, 
             "approved_leaves": 0.0, "unapproved_absences": 0.0, "status": "INACTIVE", 
             "verification_status": "Rejected", "employee_notes": "Was terminated mid-month",
             "corrected_days": 25.0, "corrected_leaves": 0.0, "corrected_absences": 0.0
         },
         {
-            "period_key": "2026-08", "employee_code": "EMP-9999", "full_name": "Ghost Employee", 
-            "email": "ghost@axian.com", "location_code": "US-MAIN", "days_worked": 22.0, 
+            "period_key": "2026-08", "employee_code": "EMP-9999", "full_name": "Osama Ghost", 
+            "email": "osamarasheed147@gmail.com", "location_code": "US-MAIN", "days_worked": 22.0, 
             "approved_leaves": 0.0, "unapproved_absences": 0.0, "status": "ACTIVE", 
             "verification_status": "", "employee_notes": "Not in master DB",
             "corrected_days": "", "corrected_leaves": "", "corrected_absences": ""
